@@ -1,5 +1,12 @@
 import simpy
-import types
+
+
+def old_car(env):
+    while True:
+        parking_duration = 2
+        yield env.timeout(parking_duration)
+        driving_duration = 5
+        yield env.timeout(driving_duration)
 
 
 class Car:
