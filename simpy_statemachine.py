@@ -4,18 +4,6 @@ import types
 
 class Car:
 
-    def parking(self):
-        print('parking... at', self.env.now)
-        parking_duration = 5
-        yield self.env.timeout(parking_duration)
-        return self.driving
-
-    def driving(self):
-        print('driving... at', self.env.now)
-        driving_duration = 2
-        yield self.env.timeout(driving_duration)
-        return self.parking
-
     def __init__(self, env):
         self.env = env
 
@@ -27,9 +15,21 @@ class Car:
                 # run the generator
                 yield next(state)
             except StopIteration as e:
-                # The state has ended;
-                # create a generator for the new state
+                # The state has ended, and told us what state to transition to.
+                # Create a generator for the new state
                 state = e.value()
+
+    def parking(self):
+        print('parking... at', self.env.now)
+        parking_duration = 5
+        yield self.env.timeout(parking_duration)
+        return self.driving
+
+    def driving(self):
+        print('driving... at', self.env.now)
+        driving_duration = 2
+        yield self.env.timeout(driving_duration)
+        return self.parking
 
 
 if __name__ == '__main__':
