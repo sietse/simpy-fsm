@@ -40,3 +40,12 @@ class Actor:
             if state_func is None:
                 break
             state = state_func()
+
+
+def process_name(i: int, of: int) -> str:
+    """Return a name like '0 | | |' or '| | 2 |'. This makes it easy to follow
+    each process's log messages, because you just go down the line until you
+    encounter the same number again."""
+    lines = ['|'] * of
+    lines[i] = str(i)
+    return ' '.join(lines)
