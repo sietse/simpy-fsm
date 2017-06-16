@@ -1,3 +1,9 @@
+# Behaviour is identical to simpy_3_resource.py. The difference in
+# implementation: Awaiting a charging station + using it is not one
+# state that starts with a context manager, but it is two separate
+# states. awaiting_battery() awaits the slot; charging() takes the slot,
+# charges, and releases the slot.
+
 import simpy
 
 from actor import Actor, process_name
@@ -21,12 +27,22 @@ class Car(Actor):
         return self.awaiting_battery
 
     def awaiting_battery(self):
+        # Wait for the charging station and acquire it
         self.charging_request = self.charging_station.request()
         yield self.charging_request
         print('%s starting to charge at %s' % (self.name, self.env.now))
+        # Instead of invisibly passing `charging_request` via `self` to
+        # the `charging` state, can we make the flow of data clearer
+        # by making `charging_request` part of the thunk we return?
+        # Something like this:
+        #
+        #     return (self.charging, charging_request)
+        #
+        # which Actor._process would then handle appropriately.
         return self.charging
 
     def charging(self):
+        # The charging station has been acquired;
         try:
             yield env.timeout(self.charging_time)
             print('%s leaving the bcs at %s' % (self.name, self.env.now))
