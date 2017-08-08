@@ -43,9 +43,21 @@ class Actor:
 
 
 def process_name(i: int, of: int) -> str:
-    """Return a name like '0 | | |' or '| | 2 |'. This makes it easy to follow
-    each process's log messages, because you just go down the line until you
-    encounter the same number again."""
+    """Return e.g. '| | 2 |': an n-track name with track `i` (here i=2) marked.
+
+    This makes it easy to follow each process's log messages, because you just
+    go down the line until you encounter the same number again.
+
+    Example: The interleaved log of four processes that each simulate a car
+    visiting a charging station. The processes have been named with
+    `process_name()`, and their log messages start with their `self.name`.
+    (Car #2 does not turn up in this snippet.)
+
+        | | | 3 arriving at 6
+        | 1 | | starting to charge at 7
+        0 | | | starting to charge at 7
+        | 1 | | leaving the bcs at 9
+    """
     lines = ['|'] * of
     lines[i] = str(i)
     return ' '.join(lines)
