@@ -13,9 +13,9 @@ This happens at line 156:
         def working
             yield env.timeout(self.work_left)
 
-It is solved by removing the `self.work_left = 0` inside the non-interrupted
-branch. Open question: what is the sequence of events that leads to this
-invalid state of negative work_left?
+The solution: move `start = self.env.now` until just after `yield req`. The
+unimportant work only starts/resumes once our request for a repairman is
+granted.
 
 
 Deeper challenge

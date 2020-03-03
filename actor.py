@@ -16,9 +16,10 @@ class Actor:
 
             def some_state(self):
                 try:
-                    # pass control to the Environment
+                    # pass control to the Environment: this represents spending
+                    # time in the current state
                     yield self.env.timeout()
-                    # return the state to transition to
+                    # return the state to transition to when we are reactivated
                     return self.driving
                 except simpy.Interrupt as interrupt:
                     # Catch interrupts and and act on them

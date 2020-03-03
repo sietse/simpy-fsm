@@ -148,15 +148,12 @@ class UnimportantWork(Actor):
         # Start a new job
         # Retry the job until it is done.
         # Its priority is lower than that of machine repairs.
-        start = self.env.now
         with self.repairman.request(priority=2) as req:
-            yield req
+            yield req  # Wait until we get a repairman
+            start = self.env.now
             try:
                 print('starting work', self.work_left)
                 yield env.timeout(self.work_left)
-                print('control yielded back', self.work_left)
-                self.work_left = 0
-                print('have set work to 0', self.work_left)
                 self.finish_work_and_prepare_next()
                 print('done_preparing work', self.work_left)
                 return self.working
