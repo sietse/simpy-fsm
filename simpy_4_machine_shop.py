@@ -175,6 +175,9 @@ class UnimportantWork(Actor):
                 self.work_left = self.work_left - work_done
                 return self.working
 
+    def __repr__(self):
+        return f"UnimportantWork(works_made={self.works_made}, work_left={self.work_left})"
+
 
 # Setup and start the simulation
 print('Machine shop')
