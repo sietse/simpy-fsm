@@ -139,6 +139,8 @@ class UnimportantWork(Actor):
         self.work_left = UNIMPORTANT_WORK_TIME  # how long the unimportant jobs take
 
     def finish_work_and_prepare_next(self):
+        floating_point_error = self.work_left - 0
+        self.work_left = 0
         self.works_made += 1
         self.prepare_work()
 
@@ -150,12 +152,22 @@ class UnimportantWork(Actor):
             try:
                 # Try to work on the job until it is done ...
                 yield env.timeout(self.work_left)
-                # ... (a) if we are left in peace, control is yielded back
-                #     to us when we finish.
+                # ... (a) if the repairman is not called away, control is
+                #     yielded back to us at the time our work is done, and we
+                #     resume at *this* point in the code ...
+
+                # This is vulnerable to floating-point errors. See [1], below,
+                # for the explanation. For now, finish_work_and_prepare_next()
+                # resets self.work_left to 0
+                work_done = self.env.now - start
+                self.work_left = self.work_left - work_done
                 self.finish_work_and_prepare_next()
                 return self.working
-            # ... (b) but if we are interrupted, the yield timeout gets sent an
-            #     Interrupt.
+
+            # ... (b) but if the repairman is called away, the yield timeout
+            #     above gets sent an Interrupt, and we resume at *this* point
+            #     in the code.
+            #
             # We record where we were, and then try working again -- that will
             # start when we get our repairman back.
             except simpy.Interrupt:
