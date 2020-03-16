@@ -37,7 +37,7 @@ NUM_MACHINES = 10      # Number of machines in the machine shop
 WEEKS = 4              # Simulation time in weeks
 SIM_TIME = WEEKS * 7 * 24 * 60  # Simulation time in minutes
 
-UNIMPORTANT_TIME = 7
+UNIMPORTANT_WORK_TIME = 7.0
 
 
 def spy(x, label=''):
@@ -136,8 +136,7 @@ class UnimportantWork(Actor):
         super().__init__(env, initial_state)
 
     def prepare_work(self):
-        self.work_left = UNIMPORTANT_TIME
-        print('work is prepared', self.work_left)
+        self.work_left = UNIMPORTANT_WORK_TIME  # how long the unimportant jobs take
 
     def finish_work_and_prepare_next(self):
         self.works_made += 1
