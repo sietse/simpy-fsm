@@ -148,26 +148,19 @@ class UnimportantWork(Actor):
             yield req  # Wait until we get a repairman
             start = self.env.now
             try:
-                print('starting work', self.work_left)
                 # Try to work on the job until it is done ...
                 yield env.timeout(self.work_left)
                 # ... (a) if we are left in peace, control is yielded back
                 #     to us when we finish.
                 self.finish_work_and_prepare_next()
-                print('done_preparing work', self.work_left)
                 return self.working
             # ... (b) but if we are interrupted, the yield timeout gets sent an
             #     Interrupt.
             # We record where we were, and then try working again -- that will
             # start when we get our repairman back.
             except simpy.Interrupt:
-                print('interrupted', self.work_left)
                 work_done = self.env.now - start
-                print('start', start)
-                print('now', self.env.now)
-                print('work done', work_done)
                 self.work_left = self.work_left - work_done
-                print('after interrupt updated work', self.work_left)
                 return self.working
 
 
