@@ -1,11 +1,43 @@
+Summary
+-------
+
+Simpy is nice and all, but there is one thing that makes it hard to keep track
+of state: it isn't explicit, it is a mere 'where in the control flow are we?'
+
+actor.py solves that: it contains plumbing that lets you write classes with 
+
+- One method per state
+- States can yield to simpy like normal
+- When a state ends, it returns the state (self.some_method) to transition to;
+  the Actor class takes care of running it.
+
+
+Compare the traditional `simpy_3_old.py` to the rewrites in
+`simpy_3_resource.py`, and `simpy_3b_resource_manually.py`, which encode the
+objects as Actor instances, with a method per state. `simpy_3_old.py` comes
+from Simpy's introduction:
+https://simpy.readthedocs.io/en/latest/simpy_intro/basic_concepts.html
+
 Current challenge
 -----------------
+
+Extract a separate waiting-for-repairman state in simpy_4_machine_shop.py
+
+
+Solved challenge: work_left is not exactly zero
+-----------------------------------------------
+
+This was caused by Floating-point errors. The absolute error got larger as
+the floats involved got larger, which is how floats behave.
+
+Solved challenge: negative delays
+---------------------------------
 
 Run simpy_4_machine_shop.py. Expected behaviour: no errors. Observed behaviour:
 
     ValueError: Negative delay -29.08065477559603
 
-What causes this bug?
+What causes this bug? This bug
 
 This happens at line 156:
 
@@ -15,7 +47,8 @@ This happens at line 156:
 
 The solution: move `start = self.env.now` until just after `yield req`. The
 unimportant work only starts/resumes once our request for a repairman is
-granted.
+granted. When `start = self.env.now` was recorded before `yield req`, the work
+counter started when we started *waiting* for a repairman.
 
 
 Deeper challenge
