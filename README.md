@@ -18,6 +18,15 @@ objects as Actor instances, with a method per state. `simpy_3_old.py` comes
 from Simpy's introduction:
 https://simpy.readthedocs.io/en/latest/simpy_intro/basic_concepts.html
 
+Refactoring
+-----------
+
+- Rename `actor` to `FSM`, or `Machine`, or something else like '(Finite) State Machine'
+- Create two ways to initialize an FSM:
+  - as a Process (`env.process(x)`)
+  - as a subprocess (`yield from x`)
+
+
 Current challenge
 -----------------
 
@@ -29,6 +38,7 @@ Solved challenge: work_left is not exactly zero
 
 This was caused by Floating-point errors. The absolute error got larger as
 the floats involved got larger, which is how floats behave.
+
 
 Solved challenge: negative delays
 ---------------------------------
@@ -51,8 +61,13 @@ granted. When `start = self.env.now` was recorded before `yield req`, the work
 counter started when we started *waiting* for a repairman.
 
 
-Deeper challenge
-----------------
+Deeper challenge: Implement a state machine library in Simpy
+------------------------------------------------------------
+
+What features should it have?
+
+Deeper challenge: a Task class that keeps track of countdown
+------------------------------------------------------------
 
 http://simpy.readthedocs.io/en/latest/simpy_intro/process_interaction.html?highlight=interrupt
 http://simpy.readthedocs.io/en/latest/topical_guides/process_interaction.html#sleep-until-woken-up

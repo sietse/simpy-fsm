@@ -1,11 +1,16 @@
 class Actor:
-    def __init__(self, env: 'simpy.core.Environment', initial_state):
+    def __init__(self, env: 'simpy.core.Environment', initial_state,
+            activate=True):
         """
         Create a process for the instance, and add it to the env.
         """
         self.env = env
-        # Create a process; add it to the env; and make it accessible on self.
-        self.process = env.process(self._process(initial_state))
+        # Eureka!! Lesson 5: if we don't automatically turn the generator into
+        # a Simpy Process with env.process, then it can also function as a
+        # substate if a higher-level state calls `yield from` on it.
+        if activate:
+            # Create a process; add it to the env; and make it accessible on self.
+            self.process = env.process(self._process(initial_state))
 
     def _process(self, initial_state):
         """
