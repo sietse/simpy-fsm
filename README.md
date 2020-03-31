@@ -47,13 +47,36 @@ Run simpy_4_machine_shop.py. Expected behaviour: no errors. Observed behaviour:
 
     ValueError: Negative delay -29.08065477559603
 
-What causes this bug? This bug
+What causes this bug? This is where and how the bug happens (simplified)
 
-This happens at line 156:
+    class UnimportantWork:
+        def working(self):
 
-    class UnimportantWork
-        def working
-            yield env.timeout(self.work_left)
+            # BUG step 1: waiting for the repair person is not the
+            # same as working
+            start = self.env.now
+
+            with self.repairman.request(priority=2) as req:
+                yield req  # Wait until we get a repairman
+
+                # BUG mitigation: here is where we should record the `start` time.
+
+                try:
+
+                    # BUG step 3: Try to wait for a negative `work_left` time.
+                    # Try to work on the job until it is done ...
+                    yield env.timeout(self.work_left)
+
+                except simpy.Interrupt:
+
+                    # BUG step 2: `now - start` is more than `work left`,
+                    # because we add the time we were waiting for the
+                    # repairperson. As a result `self.work_left` is set to a
+                    # negative value.
+                    work_done = self.env.now - start
+                    self.work_left = self.work_left - work_done
+
+                    return self.working
 
 The solution: move `start = self.env.now` until just after `yield req`. The
 unimportant work only starts/resumes once our request for a repairman is
