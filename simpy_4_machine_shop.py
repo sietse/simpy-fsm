@@ -65,8 +65,9 @@ class Machine(Actor):
 
     """
     def __init__(self, env, initial_state='working', *,
-                 name, repairman):
+                 name, id, repairman):
         self.name = name
+        self.id = id
         self.repairman = repairman
         self.parts_made = 0
         self.broken = False
@@ -109,7 +110,6 @@ class Machine(Actor):
                 yield self.env.timeout(REPAIR_TIME)
         finally:
             return self.working
-
 
 
 class MachineFailure(Actor):
@@ -188,12 +188,29 @@ env = simpy.Environment()
 repairman = simpy.PreemptiveResource(env, capacity=1)
 unimportant_work = UnimportantWork(env, repairman=repairman)
 machines = [
-    Machine(env, name=process_name(i, of=NUM_MACHINES), repairman=repairman)
+    Machine(env, id=i, name=process_name(i, of=NUM_MACHINES), repairman=repairman)
     for i in range(NUM_MACHINES)
 ]
 
+def snapshot(env, repairman, unimportant_work, machines):
+    broken_machines = [m.id for m in machines if m.broken]
+    repairman_processes = [request.proc for request in repairman.users]
+    repairman_at = (
+        [m.id for m in machines if m.process in repairman_processes] +
+        (['unimportant_work']
+         if unimportant_work.process in repairman_processes
+         else [])
+    )
+    return f'Repairman at {repairman_at}; broken {broken_machines}; made {unimportant_work.works_made}'
+
 # Execute!
-env.run(until=SIM_TIME)
+prev_info = ''
+while env.now < 200:
+    info = snapshot(env, repairman, unimportant_work, machines)
+    if info[4:] != prev_info[4:]:
+        prev_info = info
+        print(f'{round(env.now)} {info}')
+    env.step()
 
 # Analyis/results
 print('Machine shop results after %s weeks' % WEEKS)
