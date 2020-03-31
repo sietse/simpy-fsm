@@ -4,7 +4,7 @@ Summary
 Simpy is nice and all, but there is one thing that makes it hard to keep track
 of state: it isn't explicit, it is a mere 'where in the control flow are we?'
 
-actor.py solves that: it contains plumbing that lets you write classes with 
+actor.py solves that: it contains plumbing that lets you write classes with
 
 - One method per state
 - States can yield to simpy like normal
@@ -87,7 +87,21 @@ counter started when we started *waiting* for a repairman.
 Deeper challenge: Implement a state machine library in Simpy
 ------------------------------------------------------------
 
-What features should it have?
+- What features should it have?
+- What features do other state machine libraries have?
+- It should definitely have plotting features:
+  - Generate `dot` plots of supported transitions (and signals)?
+    - Or even generate Harel State Charts?
+  - Generate diagrams of states over time.
+    - per-Process:
+        - One or more Process's state transitions (a sequence diagram, or any
+          multi-line diagram, might be good for this if there are few states)
+        - Messages (interrupts) sent between Processes.
+    - Aggregated over many processes:
+        - Over time, for a process type, the number of processes in each state.
+        - Messages sent, per message type, over time
+        - total process*time spent in each state
+
 
 Deeper challenge: a Task class that keeps track of countdown
 ------------------------------------------------------------
