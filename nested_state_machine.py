@@ -1,6 +1,6 @@
 import simpy
 
-from actor import Actor
+from actor import FSM
 
 
 
@@ -14,7 +14,7 @@ class TurnOff:
     pass
 
 
-class Stoplight(Actor):
+class Stoplight(FSM):
     """A state machine: a stoplight you can turn on and off."""
 
     def __init__(self, env, initial_state='off'):
@@ -58,7 +58,7 @@ class Stoplight(Actor):
                 return self.off
 
 
-class StoplightOn(Actor):
+class StoplightOn(FSM):
     """A state machine: A turned-on stoplight that cycles between
     green/yellow/red. These states are substates of `Stoplight.on`.
     """

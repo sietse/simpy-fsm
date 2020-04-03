@@ -1,14 +1,14 @@
 import simpy
 import enum
 
-from actor import Actor
+from actor import FSM
 
 
 class Signal(enum.Enum):
     drive = 0
 
 
-class Car(Actor):
+class Car(FSM):
 
     def __init__(self, env, initial_state='charging'):
         super().__init__(env, initial_state)
@@ -33,7 +33,7 @@ class Car(Actor):
         return self.charging
 
 
-class Driver(Actor):
+class Driver(FSM):
 
     def __init__(self, env, car, initial_state='impatient'):
         self.car = car

@@ -9,12 +9,12 @@ actor.py solves that: it contains plumbing that lets you write classes with
 - One method per state
 - States can yield to simpy like normal
 - When a state ends, it returns the state (self.some_method) to transition to;
-  the Actor class takes care of running it.
+  the FSM class takes care of running it.
 
 
 Compare the traditional `simpy_3_old.py` to the rewrites in
 `simpy_3_resource.py`, and `simpy_3b_resource_manually.py`, which encode the
-objects as Actor instances, with a method per state. `simpy_3_old.py` comes
+objects as FSM instances, with a method per state. `simpy_3_old.py` comes
 from Simpy's introduction:
 https://simpy.readthedocs.io/en/latest/simpy_intro/basic_concepts.html
 

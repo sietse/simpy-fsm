@@ -19,7 +19,7 @@ import random
 
 import simpy
 
-from actor import Actor, process_name
+from actor import FSM, process_name
 
 
 RANDOM_SEED = 42
@@ -55,7 +55,7 @@ def time_to_failure():
     return spy(random.expovariate(BREAK_MEAN), label='expo')
 
 
-class Machine(Actor):
+class Machine(FSM):
     """A machine produces parts and my get broken every now and then.
 
     If it breaks, it requests a *repairman* and continues the production
@@ -115,7 +115,7 @@ class Machine(Actor):
         return self.working
 
 
-class MachineFailure(Actor):
+class MachineFailure(FSM):
 
     def __init__(self, env, initial_state='break_machine', *, machine):
         self.machine = machine
@@ -130,7 +130,7 @@ class MachineFailure(Actor):
         return self.break_machine
 
 
-class UnimportantWork(Actor):
+class UnimportantWork(FSM):
 
     def __init__(self, env, initial_state='awaiting_repairman', *, repairman):
         self.repairman = repairman

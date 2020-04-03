@@ -1,9 +1,9 @@
 import simpy
 
-from actor import Actor, process_name
+from actor import FSM, process_name
 
 
-class Car(Actor):
+class Car(FSM):
 
     def __init__(self, env, initial_state='driving', *,
             name, charging_station, driving_time, charging_time):

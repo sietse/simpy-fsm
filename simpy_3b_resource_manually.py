@@ -6,10 +6,10 @@
 
 import simpy
 
-from actor import Actor, process_name
+from actor import FSM, process_name
 
 
-class Car(Actor):
+class Car(FSM):
     """Like Car, but handles the resource itself instead of with a context
     manager."""
 
@@ -38,7 +38,7 @@ class Car(Actor):
         #
         #     return (self.charging, charging_request)
         #
-        # which Actor._process would then handle appropriately.
+        # which FSM._process would then handle appropriately.
         return self.charging
 
     def charging(self):

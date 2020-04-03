@@ -1,4 +1,4 @@
-class Actor:
+class FSM:
     def __init__(self, env: 'simpy.core.Environment', initial_state,
             activate=True):
         """
