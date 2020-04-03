@@ -31,7 +31,7 @@ class Stoplight(FSM):
             # yield substate.process('green')
 
             # Lesson 4: Hooray this works!
-            yield from substate._process('green')
+            yield from substate.main('green')
         # Lesson 2: can't create custom Interrupt types, but can customize via
         # Interrupt.cause.
         except simpy.Interrupt as interrupt:

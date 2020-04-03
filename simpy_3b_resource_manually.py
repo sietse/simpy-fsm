@@ -38,7 +38,7 @@ class Car(FSM):
         #
         #     return (self.charging, charging_request)
         #
-        # which FSM._process would then handle appropriately.
+        # which FSM.main would then handle appropriately.
         return self.charging
 
     def charging(self):

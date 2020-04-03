@@ -10,9 +10,9 @@ class FSM:
         # substate if a higher-level state calls `yield from` on it.
         if activate:
             # Create a process; add it to the env; and make it accessible on self.
-            self.process = env.process(self._process(initial_state))
+            self.process = env.process(self.main(initial_state))
 
-    def _process(self, initial_state):
+    def main(self, initial_state):
         """
         Each actor is/has a single process. This process instantiates a
         generator for the current state, and yields from it -- `yield from`
