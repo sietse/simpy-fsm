@@ -6,7 +6,7 @@
 
 import simpy
 
-from actor import FSM, process_name
+from fsm import FSM, process_name
 
 
 class Car(FSM):

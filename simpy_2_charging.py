@@ -1,7 +1,7 @@
 import simpy
 import enum
 
-from actor import FSM
+from fsm import FSM
 
 
 class Signal(enum.Enum):

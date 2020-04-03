@@ -1,6 +1,6 @@
 import simpy
 
-from actor import FSM
+from fsm import FSM
 
 
 

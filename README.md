@@ -4,7 +4,7 @@ Summary
 Simpy is nice and all, but there is one thing that makes it hard to keep track
 of state: it isn't explicit, it is a mere 'where in the control flow are we?'
 
-actor.py solves that: it contains plumbing that lets you write classes with
+fsm.py solves that: it contains plumbing that lets you write classes with
 
 - One method per state
 - States can yield to simpy like normal
