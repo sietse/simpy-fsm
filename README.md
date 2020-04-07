@@ -18,19 +18,153 @@ objects as FSM instances, with a method per state. `simpy_3_old.py` comes
 from Simpy's introduction:
 https://simpy.readthedocs.io/en/latest/simpy_intro/basic_concepts.html
 
+
+Design to try out
+-----------------
+
+- [ ] ProcessFSM has a .process attribute, much like now.
+- [ ] SubstateFSM is a generator.
+- [ ] `data` object is passed as arg to state methods.
+
+
+Design space
+------------
+
+Questions/dimensions:
+- How do I instantiate an FSM meant to have a process? Do I start a process for
+  it manually, or is that automatically done at the instance's initialization?
+
+- How do I, given an FSM instance, find its Process?
+  - my_fsm.process
+  - pair = (my_fsm, process)
+- How do I, given an FSM instance, get its data?
+- How do I, given an FSM instance
+
+### 1. ProcessFSM: How do I instantiate FSM and Process?
+
+- [ ] The FSM *is* a Process
+
+    # Awaiting a new car process
+    yield Car()
+
+    # Creating a new car
+    car1 = Car()
+    car1.interrupt()
+
+  - No need to remember which object to address
+  - Mixes the state machine behaviour and the Process interface together
+    in one object
+  - No need to track both FSM and process objects
+  - Lot of reserved names that can't be used for state names:
+    defused, fail, interrupt, is_alive, ok, processed,
+    property, succeed, target, trigger, triggered, value,
+  - Hides detail of process creation
+  - Can't create object in advance and start process later.
+
+
+- [ ] Instantiating the FSM automatically instantiates the process
+
+    # Awaiting a new car process
+    yield Car().process
+
+    # Creating a new car
+    car1 = Car()
+    car1.process.interrupt
+
+  - Keeps separate FSM and Process APIs as 2 separate objects.
+  - Can always get process from FSM -- no need for separate table.
+  - Hides detail of process creation
+  - Can't create object in advance and start process later.
+  - Must remember to inspect car1, but interrupt car1.process.
+
+- [ ] Create the process manually from the generator
+
+    # Awaiting a new car process
+    yield env.process(Car().generator)
+
+    # Creating a new car (store process separately)
+    car1 = Car()
+    process = env.process(car1.generator)
+    process.interrupt()
+
+    # Creating a new car (store process on car)
+    car1 = Car()
+    car1.process = env.process(car1.generator)
+    car1.process.interrupt()
+
+  - User must keep track of FSM + process pair
+  - Makes process creation mechanism explicit
+  - Can create object in advance and start process later -- but do you want to?
+  - reserved name `generator`, used only in process init incantation
+  - Possible to accidentally create multiple processes pushing the same generator?
+
+
+- [ ] Create the process manually from the generator function
+
+    # Awaiting a new car process
+    yield env.process(Car().generator)
+
+    # Creating a new car (store process separately)
+    car1 = Car()
+    process = env.process(car1.main())
+    process.interrupt
+
+    # Creating a new car (store process on car)
+    car1 = Car()
+    car1.process = env.process(car1.main())
+    car1.process.interrupt()
+
+  - Most explicitest about process creation mechanism
+  - Reserved name `main`, used only in process init incantation
+  - `main` is an okay name for a state, people might want to use it themselves
+  - Possible to accidentally create multiple processes mutating the same object
+
+
+### 2. SubstateFSM: How do I expose a SubstateFSM instance as a generator to yield from?
+
+- [ ] The FSM instance is a generator
+
+    yield from StoplightOn()
+
+- [ ] The FSM instance has a generator
+
+    yield from StoplightOn().generator
+
+- [ ] The FSM instance has a generator function that the caller turns into a
+  generator.
+
+    yield from StoplightOn().main()
+
+
+### 3. FSM: where does an FSM's associated data live?
+
+- [ ] attributes on `self`
+- [ ] attributes on `self.data`
+- [ ] on a `data` object passed into the state method: `def mystate(self, data)`
+
+
+### 4. SubstateFSM: when writing a SubstateFSM, how does it access its parent's data?
+
+- [ ] By passing the same `data` object to parent and child alike.
+  I like this option
+- [ ] Set `.parent` on the substateFSM; then state methods can access
+  `self` and `self.parent`, or `self.data` and `self.parent.data`.
+
+
 Refactoring
 -----------
 
-- Rename `actor` to `FSM`, or `Machine`, or something else like '(Finite) State Machine'
 - Create two ways to initialize an FSM:
   - as a Process (`env.process(x)`)
   - as a subprocess (`yield from x`)
+- Keep a log of state transitions on the object
 
 
 Current challenge
 -----------------
 
-- Extract a separate waiting-for-repairman state in simpy_4_machine_shop.py
+- [x] Extract a separate waiting-for-repairman state in simpy_4_machine_shop.py
+- [x] Rename `actor` to `FSM`, or `Machine`, or something else like '(Finite) State Machine'
 
 
 
