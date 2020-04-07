@@ -30,7 +30,8 @@ Refactoring
 Current challenge
 -----------------
 
-Extract a separate waiting-for-repairman state in simpy_4_machine_shop.py
+- Extract a separate waiting-for-repairman state in simpy_4_machine_shop.py
+
 
 
 Solved challenge: work_left is not exactly zero

@@ -99,17 +99,20 @@ class Machine(Actor):
         except simpy.Interrupt:
             # Record how much work was left, and await the repair man
             self.work_left -= self.env.now - start
-            return self.awaiting_repair
+            return self.awaiting_repairman
 
-    def awaiting_repair(self):
-        # Request a repairman. This will preempt its "other_job".
+    def awaiting_repairman(self):
+        # Request a repairman. This will preempt the UnimportantWork that
+        # otherwise occupies the repairman.
         self.broken = True
-        try:
-            with self.repairman.request(priority=1) as req:
-                yield req
-                yield self.env.timeout(REPAIR_TIME)
-        finally:
-            return self.working
+        self.repairman_request = self.repairman.request(priority=1)
+        yield self.repairman_request
+        return self.being_repaired
+
+    def being_repaired(self):
+        yield self.env.timeout(REPAIR_TIME)
+        self.repairman.release(self.repairman_request)
+        return self.working
 
 
 class MachineFailure(Actor):
@@ -129,10 +132,11 @@ class MachineFailure(Actor):
 
 class UnimportantWork(Actor):
 
-    def __init__(self, env, initial_state='working', *, repairman):
+    def __init__(self, env, initial_state='awaiting_repairman', *, repairman):
         self.repairman = repairman
         self.works_made = 0
         self.prepare_work()
+        self.state = initial_state
         super().__init__(env, initial_state)
 
     def prepare_work(self):
@@ -144,36 +148,47 @@ class UnimportantWork(Actor):
         self.works_made += 1
         self.prepare_work()
 
+    def awaiting_repairman(self):
+        self.state = 'awaiting_repairman'
+        self.repairman_request = self.repairman.request(priority=2)
+        x = (yield self.repairman_request)
+        print(env.now, x)
+        return self.working
+
     def working(self):
+        assert self.process in [u.proc for u in self.repairman.users]
+        self.state = 'working'
         """Claim the repairman with low priority"""
-        with self.repairman.request(priority=2) as req:
-            yield req  # Wait until we get a repairman
-            start = self.env.now
-            try:
-                # Try to work on the job until it is done ...
-                yield env.timeout(self.work_left)
-                # ... (a) if the repairman is not called away, control is
-                #     yielded back to us at the time our work is done, and we
-                #     resume at *this* point in the code ...
+        start = self.env.now
+        try:
+            # Try to work on the job until it is done ...
+            x = (yield env.timeout(self.work_left))
+            print(env.now, x)
+            if env.now >= 28:
+                # import ipdb; ipdb.set_trace()  # FIXME
+                pass
+            # ... (a) if the repairman is not called away, control is
+            #     yielded back to us at the time our work is done, and we
+            #     resume at *this* point in the code ...
 
-                # This is vulnerable to floating-point errors. See [1], below,
-                # for the explanation. For now, finish_work_and_prepare_next()
-                # resets self.work_left to 0
-                work_done = self.env.now - start
-                self.work_left = self.work_left - work_done
-                self.finish_work_and_prepare_next()
-                return self.working
+            # This is vulnerable to floating-point errors. See [1], below,
+            # for the explanation. For now, finish_work_and_prepare_next()
+            # resets self.work_left to 0
+            work_done = self.env.now - start
+            self.work_left = self.work_left - work_done
+            self.finish_work_and_prepare_next()
+            return self.working
 
-            # ... (b) but if the repairman is called away, the yield timeout
-            #     above gets sent an Interrupt, and we resume at *this* point
-            #     in the code.
-            #
-            # We record where we were, and then try working again -- that will
-            # start when we get our repairman back.
-            except simpy.Interrupt:
-                work_done = self.env.now - start
-                self.work_left = self.work_left - work_done
-                return self.working
+        # ... (b) but if the repairman is called away, the yield timeout
+        #     above gets sent an Interrupt, and we resume at *this* point
+        #     in the code.
+        #
+        # We record where we were, and then try working again -- that will
+        # start when we get our repairman back.
+        except simpy.Interrupt:
+            work_done = self.env.now - start
+            self.work_left = self.work_left - work_done
+            return self.awaiting_repairman
 
     def __repr__(self):
         return f"UnimportantWork(works_made={self.works_made}, work_left={self.work_left})"
@@ -201,7 +216,7 @@ def snapshot(env, repairman, unimportant_work, machines):
          if unimportant_work.process in repairman_processes
          else [])
     )
-    return f'Repairman at {repairman_at}; broken {broken_machines}; made {unimportant_work.works_made}'
+    return f'Repairman at {repairman_at}; broken {broken_machines}; UW state {unimportant_work.state}, made {unimportant_work.works_made}'
 
 # Execute!
 prev_info = ''
