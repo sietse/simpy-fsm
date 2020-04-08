@@ -1,6 +1,6 @@
 import simpy
 
-from fsm import FSM
+from fsm import FSM, SubstateFSM
 
 
 
@@ -21,9 +21,9 @@ class Stoplight(FSM):
         super().__init__(env, initial_state)
 
     def on(self, data):
-        self.state = 'on'
+        data.state = 'on'
         try:
-            substate = StoplightOn(self, activate=False)
+            substate = StoplightOn(self.env, 'green', data)
             # Lesson 1: yielding the process of a nested state machine (NSM)
             # runs the NSM, but it doesn't delegate to it: any Interrupt is
             # sent to us, not to the nested process.
@@ -31,7 +31,7 @@ class Stoplight(FSM):
             # yield substate.process('green')
 
             # Lesson 4: Hooray this works!
-            yield from substate.main('green')
+            yield from substate.generator
         # Lesson 2: can't create custom Interrupt types, but can customize via
         # Interrupt.cause.
         except simpy.Interrupt as interrupt:
@@ -46,8 +46,8 @@ class Stoplight(FSM):
                 return self.off
 
     def off(self, data):
-        self.state = 'off'
-        self.colour = None
+        data.state = 'off'
+        data.colour = None
         try:
             yield simpy.Timeout(self.env, 100)
             return self.off
@@ -58,27 +58,23 @@ class Stoplight(FSM):
                 return self.off
 
 
-class StoplightOn(FSM):
+class StoplightOn(SubstateFSM):
     """A state machine: A turned-on stoplight that cycles between
     green/yellow/red. These states are substates of `Stoplight.on`.
     """
 
-    def __init__(self, parent, initial_state='green', activate=False):
-        self.parent = parent
-        super().__init__(parent.env, initial_state, activate)
-
     def green(self, data):
-        self.parent.colour = 'green'
+        data.colour = 'green'
         yield simpy.Timeout(self.env, 3)
         return self.yellow
 
     def yellow(self, data):
-        self.parent.colour = 'yellow'
+        data.colour = 'yellow'
         yield simpy.Timeout(self.env, 1)
         return self.red
 
     def red(self, data):
-        self.parent.colour = 'red'
+        data.colour = 'red'
         yield simpy.Timeout(self.env, 4)
         return self.green
 
@@ -91,12 +87,13 @@ if __name__ == '__main__':
         # Again, lesson 2: can't create custom Interrupt types, but can
         # customize via Interrupt.cause.
         stoplight.process.interrupt(TurnOn)
-        print(f'{env.now}: {stoplight.state} ({stoplight.colour})')
+        data = stoplight.data
+        print(f'{env.now}: {data.state} ({data.colour})')
         for i in range(12):
             env.run(until=env.now + 1)
-            print(f'{env.now}: {stoplight.state} ({stoplight.colour})')
+            print(f'{env.now}: {data.state} ({data.colour})')
         stoplight.process.interrupt(TurnOff)
-        print(f'{env.now}: {stoplight.state} ({stoplight.colour})')
+        print(f'{env.now}: {data.state} ({data.colour})')
         for i in range(12):
             env.run(until=env.now + 1)
-            print(f'{env.now}: {stoplight.state} ({stoplight.colour})')
+            print(f'{env.now}: {data.state} ({data.colour})')

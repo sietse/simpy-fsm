@@ -38,7 +38,7 @@ class Car(FSM):
         #
         #     return (self.charging, charging_request)
         #
-        # which FSM.main would then handle appropriately.
+        # which FSM._trampoline would then handle appropriately.
         return self.charging
 
     def charging(self, data):

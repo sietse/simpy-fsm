@@ -22,7 +22,7 @@ https://simpy.readthedocs.io/en/latest/simpy_intro/basic_concepts.html
 Design to try out
 -----------------
 
-- [ ] ProcessFSM has a .process attribute, much like now.
+- [x] ProcessFSM has a .process attribute, much like now.
 - [ ] SubstateFSM is a generator.
 - [x] `data` object is passed as arg to state methods.
 

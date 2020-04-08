@@ -49,12 +49,12 @@ class FSM:
         # substate if a higher-level state calls `yield from` on it.
         if activate:
             # Create a process; add it to the env; and make it accessible on self.
-            self.process = env.process(self.main(
+            self.process = env.process(self._trampoline(
                 data=self.data,
                 initial_state=initial_state
             ))
 
-    def main(self, data, initial_state: str):
+    def _trampoline(self, data, initial_state: str):
         """Create this state machine's generator.
 
         You can pass the resulting generator to Simpy's `env.process(...)` to
@@ -62,16 +62,16 @@ class FSM:
 
         If this FSM represents substates in a hierarchical state machine, the
         higher-level state can yield from the generator to pass control to this
-        substatemachine. `yield from substate_fsm.main()`
+        substatemachine. `yield from substate_fsm._trampoline()`
 
-        How this main() method works:
+        How this _trampoline() method works:
         - It's a generator, so it can be passed to `env.process`.
         - It delegates to the subgenerator (the current state method) via
           `yield from state()`. This statement opens a two-way communication
           channel between the subgenerator and Simpy's env simulation-runner.
           When a state yields, it yields control to the Simpy environment.
         - When a state is done, it can `return self.my_next_state` this returns
-          control to the main() function, which delegates to the new
+          control to the _trampoline() function, which delegates to the new
           subgenerator.
 
         Example structure:
@@ -83,6 +83,23 @@ class FSM:
             if state_func is None:
                 break
             state = state_func(data)
+
+
+class SubstateFSM(FSM):
+
+    def __init__(self, env: 'simpy.core.Environment', initial_state: str,
+            data=None):
+        """Create state machine instance, and create its Process as
+        `self.process`.
+        """
+
+        self.env = env
+        # Create `self.data` as a public handle of the `data` object
+        self.data = data if data is not None else SimpleNamespace()
+        self.generator = self._trampoline(
+            data=self.data,
+            initial_state=initial_state
+        )
 
 
 def process_name(i: int, of: int) -> str:
