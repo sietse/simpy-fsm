@@ -1,11 +1,47 @@
 from types import SimpleNamespace
 
 class FSM:
+    """To write a Simpy process in finite state machine style, inherit from
+    this class.
+
+    This is how you define such a class:
+
+    >>> class Car(FSM):
+    >>>     '''Drive for 1 hour, park for 11 hours, repeat'''
+    >>>
+    >>>     def driving(self, data):
+    >>>         yield self.env.Timeout(1)
+    >>>         data.n_trips = getattr(data, 'n_trips', 0) + 1
+    >>>         return self.parked
+    >>>
+    >>>     def self.parked(self, data)
+    >>>         try:
+    >>>             yield self.env.timeout(11)
+    >>>             return self.driving
+    >>>         except simpy.Interrupt as interrupt:
+    >>>             if interrupt.cause == 'Get driving':
+    >>>                 return self.driving
+
+    This is how you use it:
+
+    >>> import simpy
+    >>> env = simpy.Environment
+    >>> car1 = Car(env, initial_state='parked')  # also creates a Simpy process
+    >>> env.run(until=13)
+    >>> car1.data.n_trips
+    1
+    >>> car1.process.interrupt('Get driving') # interrupt the Simpy process
+    >>> env.run(until=15)
+    >>> car1.data.n_trips
+    2
+    """
+
     def __init__(self, env: 'simpy.core.Environment', initial_state: str,
             data=None, activate=True):
+        """Create state machine instance, and create its Process as
+        `self.process`.
         """
-        Create a process for the instance, and add it to the env.
-        """
+
         self.env = env
         self.data = data if data is not None else SimpleNamespace()
         # Eureka!! Lesson 5: if we don't automatically turn the generator into
@@ -19,31 +55,26 @@ class FSM:
             ))
 
     def main(self, data, initial_state: str):
-        """
-        Each actor is/has a single process. This process instantiates a
-        generator for the current state, and yields from it -- `yield from`
-        opens a two-way communication channel between the subgenerator (the
-        state) and the actor process's runner (the simpy environment).
+        """Create this state machine's generator.
 
-            def some_state(self, data):
-                try:
-                    # pass control to the Environment: this represents spending
-                    # time in the current state
-                    yield self.env.timeout(99)
-                    # return the state to transition to when we are reactivated
-                    return self.driving
-                except simpy.Interrupt as interrupt:
-                    # Catch interrupts and and act on them
-                    if interrupt.cause is Signal.drive:
-                        print("Car: rudely interrupted at {}!".format(self.env.now))
-                        # Often, an interrupt results in a state transition.
-                        return self.driving
-                    else:
-                        # Unknown signal
-                        raise interrupt
-                finally:
-                    # Actions to take on exiting state
-                    ...
+        You can pass the resulting generator to Simpy's `env.process(...)` to
+        create a corresponding Simpy Process.
+
+        If this FSM represents substates in a hierarchical state machine, the
+        higher-level state can yield from the generator to pass control to this
+        substatemachine. `yield from substate_fsm.main()`
+
+        How this main() method works:
+        - It's a generator, so it can be passed to `env.process`.
+        - It delegates to the subgenerator (the current state method) via
+          `yield from state()`. This statement opens a two-way communication
+          channel between the subgenerator and Simpy's env simulation-runner.
+          When a state yields, it yields control to the Simpy environment.
+        - When a state is done, it can `return self.my_next_state` this returns
+          control to the main() function, which delegates to the new
+          subgenerator.
+
+        Example structure:
         """
         state_func = getattr(self, initial_state)
         state = state_func(data)
