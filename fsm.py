@@ -1,6 +1,39 @@
 from types import SimpleNamespace
 
-class FSM:
+class _FSM:
+
+    def _trampoline(self, data, initial_state: str):
+        """Create this state machine's generator.
+
+        You can pass the resulting generator to Simpy's `env.process(...)` to
+        create a corresponding Simpy Process.
+
+        If this FSM represents substates in a hierarchical state machine, the
+        higher-level state can yield from the generator to pass control to this
+        substatemachine. `yield from substate_fsm._trampoline()`
+
+        How this _trampoline() method works:
+        - It's a generator, so it can be passed to `env.process`.
+        - It delegates to the subgenerator (the current state method) via
+          `yield from state()`. This statement opens a two-way communication
+          channel between the subgenerator and Simpy's env simulation-runner.
+          When a state yields, it yields control to the Simpy environment.
+        - When a state is done, it can `return self.my_next_state` this returns
+          control to the _trampoline() function, which delegates to the new
+          subgenerator.
+
+        Example structure:
+        """
+        state_func = getattr(self, initial_state)
+        state = state_func(data)
+        while True:
+            state_func = (yield from state)
+            if state_func is None:
+                break
+            state = state_func(data)
+
+
+class FSM(_FSM):
     """To write a Simpy process in finite state machine style, inherit from
     this class.
 
@@ -37,65 +70,33 @@ class FSM:
     """
 
     def __init__(self, env: 'simpy.core.Environment', initial_state: str,
-            data=None, activate=True):
-        """Create state machine instance, and create its Process as
-        `self.process`.
-        """
-
-        self.env = env
-        self.data = data if data is not None else SimpleNamespace()
-        # Eureka!! Lesson 5: if we don't automatically turn the generator into
-        # a Simpy Process with env.process, then it can also function as a
-        # substate if a higher-level state calls `yield from` on it.
-        if activate:
-            # Create a process; add it to the env; and make it accessible on self.
-            self.process = env.process(self._trampoline(
-                data=self.data,
-                initial_state=initial_state
-            ))
-
-    def _trampoline(self, data, initial_state: str):
-        """Create this state machine's generator.
-
-        You can pass the resulting generator to Simpy's `env.process(...)` to
-        create a corresponding Simpy Process.
-
-        If this FSM represents substates in a hierarchical state machine, the
-        higher-level state can yield from the generator to pass control to this
-        substatemachine. `yield from substate_fsm._trampoline()`
-
-        How this _trampoline() method works:
-        - It's a generator, so it can be passed to `env.process`.
-        - It delegates to the subgenerator (the current state method) via
-          `yield from state()`. This statement opens a two-way communication
-          channel between the subgenerator and Simpy's env simulation-runner.
-          When a state yields, it yields control to the Simpy environment.
-        - When a state is done, it can `return self.my_next_state` this returns
-          control to the _trampoline() function, which delegates to the new
-          subgenerator.
-
-        Example structure:
-        """
-        state_func = getattr(self, initial_state)
-        state = state_func(data)
-        while True:
-            state_func = (yield from state)
-            if state_func is None:
-                break
-            state = state_func(data)
-
-
-class SubstateFSM(FSM):
-
-    def __init__(self, env: 'simpy.core.Environment', initial_state: str,
             data=None):
-        """Create state machine instance, and create its Process as
+        """Init state machine instance, and init its Process as
         `self.process`.
         """
 
         self.env = env
         # Create `self.data` as a public handle of the `data` object
         self.data = data if data is not None else SimpleNamespace()
+        # Create a process; add it to the env; and make it accessible on self.
+        self.process = env.process(self._trampoline(
+            data=self.data,
+            initial_state=initial_state
+        ))
+
+
+class SubstateFSM(_FSM):
+
+    def __init__(self, env: 'simpy.core.Environment', initial_state: str, data):
+        """Init sub-state machine instance, and init its generator as
+        `self.generator`.
+
+        data: Any
+            The parent's `data` object
+        """
+
+        self.env = env
+        # Create our generator, and make it accessible on self.
         self.generator = self._trampoline(
             data=self.data,
             initial_state=initial_state
