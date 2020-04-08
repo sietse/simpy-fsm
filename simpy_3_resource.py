@@ -14,12 +14,12 @@ class Car(FSM):
         super().__init__(env, initial_state)
 
 
-    def driving(self):
+    def driving(self, data):
         yield env.timeout(self.driving_time)
         print('%s arriving at %d' % (self.name, self.env.now))
         return self.charging
 
-    def charging(self):
+    def charging(self, data):
         with self.charging_station.request() as req:
             yield req
 

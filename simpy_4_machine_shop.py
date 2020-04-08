@@ -82,7 +82,7 @@ class Machine(FSM):
         self.parts_made += 1
         self.prepare_part()
 
-    def working(self):
+    def working(self, data):
         """Produce parts as long as the simulation runs.
 
         While making a part, the machine may break multiple times.
@@ -101,7 +101,7 @@ class Machine(FSM):
             self.work_left -= self.env.now - start
             return self.awaiting_repairman
 
-    def awaiting_repairman(self):
+    def awaiting_repairman(self, data):
         # Request a repairman. This will preempt the UnimportantWork that
         # otherwise occupies the repairman.
         self.broken = True
@@ -109,7 +109,7 @@ class Machine(FSM):
         yield self.repairman_request
         return self.being_repaired
 
-    def being_repaired(self):
+    def being_repaired(self, data):
         yield self.env.timeout(REPAIR_TIME)
         self.repairman.release(self.repairman_request)
         return self.working
@@ -121,7 +121,7 @@ class MachineFailure(FSM):
         self.machine = machine
         super().__init__(env, initial_state)
 
-    def break_machine(self):
+    def break_machine(self, data):
         """Break the machine every now and then."""
         yield self.env.timeout(time_to_failure())
         if not self.machine.broken:
@@ -148,14 +148,14 @@ class UnimportantWork(FSM):
         self.works_made += 1
         self.prepare_work()
 
-    def awaiting_repairman(self):
+    def awaiting_repairman(self, data):
         self.state = 'awaiting_repairman'
         self.repairman_request = self.repairman.request(priority=2)
         x = (yield self.repairman_request)
         print(env.now, x)
         return self.working
 
-    def working(self):
+    def working(self, data):
         assert self.process in [u.proc for u in self.repairman.users]
         self.state = 'working'
         """Claim the repairman with low priority"""

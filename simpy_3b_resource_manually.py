@@ -21,12 +21,12 @@ class Car(FSM):
         self.charging_time = charging_time
         super().__init__(env, initial_state)
 
-    def driving(self):
+    def driving(self, data):
         yield env.timeout(self.driving_time)
         print('%s arriving at %d' % (self.name, self.env.now))
         return self.awaiting_battery
 
-    def awaiting_battery(self):
+    def awaiting_battery(self, data):
         # Wait for the charging station and acquire it
         self.charging_request = self.charging_station.request()
         yield self.charging_request
@@ -41,7 +41,7 @@ class Car(FSM):
         # which FSM.main would then handle appropriately.
         return self.charging
 
-    def charging(self):
+    def charging(self, data):
         # The charging station has been acquired;
         try:
             yield env.timeout(self.charging_time)

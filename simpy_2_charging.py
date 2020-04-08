@@ -13,7 +13,7 @@ class Car(FSM):
     def __init__(self, env, initial_state='charging'):
         super().__init__(env, initial_state)
 
-    def charging(self):
+    def charging(self, data):
         print('Car: start parking and charging at', self.env.now)
         charge_duration = 5
         try:
@@ -26,7 +26,7 @@ class Car(FSM):
             else:
                 raise interrupt
 
-    def driving(self):
+    def driving(self, data):
         print('Car: start driving at', self.env.now)
         trip_duration = 2
         yield self.env.timeout(trip_duration)
@@ -39,7 +39,7 @@ class Driver(FSM):
         self.car = car
         super().__init__(env, initial_state)
 
-    def impatient(self):
+    def impatient(self, data):
         yield self.env.timeout(3)
         print('Driver: I want to drive now')
         self.car.process.interrupt(Signal.drive)

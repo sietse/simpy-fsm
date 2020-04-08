@@ -20,7 +20,7 @@ class Stoplight(FSM):
     def __init__(self, env, initial_state='off'):
         super().__init__(env, initial_state)
 
-    def on(self):
+    def on(self, data):
         self.state = 'on'
         try:
             substate = StoplightOn(self, activate=False)
@@ -45,7 +45,7 @@ class Stoplight(FSM):
             if interrupt.cause is TurnOff:
                 return self.off
 
-    def off(self):
+    def off(self, data):
         self.state = 'off'
         self.colour = None
         try:
@@ -67,17 +67,17 @@ class StoplightOn(FSM):
         self.parent = parent
         super().__init__(parent.env, initial_state, activate)
 
-    def green(self):
+    def green(self, data):
         self.parent.colour = 'green'
         yield simpy.Timeout(self.env, 3)
         return self.yellow
 
-    def yellow(self):
+    def yellow(self, data):
         self.parent.colour = 'yellow'
         yield simpy.Timeout(self.env, 1)
         return self.red
 
-    def red(self):
+    def red(self, data):
         self.parent.colour = 'red'
         yield simpy.Timeout(self.env, 4)
         return self.green

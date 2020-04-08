@@ -1,25 +1,31 @@
+from types import SimpleNamespace
+
 class FSM:
     def __init__(self, env: 'simpy.core.Environment', initial_state: str,
-            activate=True):
+            data=None, activate=True):
         """
         Create a process for the instance, and add it to the env.
         """
         self.env = env
+        self.data = data if data is not None else SimpleNamespace()
         # Eureka!! Lesson 5: if we don't automatically turn the generator into
         # a Simpy Process with env.process, then it can also function as a
         # substate if a higher-level state calls `yield from` on it.
         if activate:
             # Create a process; add it to the env; and make it accessible on self.
-            self.process = env.process(self.main(initial_state))
+            self.process = env.process(self.main(
+                data=self.data,
+                initial_state=initial_state
+            ))
 
-    def main(self, initial_state: str):
+    def main(self, data, initial_state: str):
         """
         Each actor is/has a single process. This process instantiates a
         generator for the current state, and yields from it -- `yield from`
         opens a two-way communication channel between the subgenerator (the
         state) and the actor process's runner (the simpy environment).
 
-            def some_state(self):
+            def some_state(self, data):
                 try:
                     # pass control to the Environment: this represents spending
                     # time in the current state
@@ -40,12 +46,12 @@ class FSM:
                     ...
         """
         state_func = getattr(self, initial_state)
-        state = state_func()
+        state = state_func(data)
         while True:
             state_func = (yield from state)
             if state_func is None:
                 break
-            state = state_func()
+            state = state_func(data)
 
 
 def process_name(i: int, of: int) -> str:

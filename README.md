@@ -24,7 +24,7 @@ Design to try out
 
 - [ ] ProcessFSM has a .process attribute, much like now.
 - [ ] SubstateFSM is a generator.
-- [ ] `data` object is passed as arg to state methods.
+- [x] `data` object is passed as arg to state methods.
 
 
 Design space
