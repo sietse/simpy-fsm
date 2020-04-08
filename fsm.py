@@ -1,5 +1,5 @@
 class FSM:
-    def __init__(self, env: 'simpy.core.Environment', initial_state,
+    def __init__(self, env: 'simpy.core.Environment', initial_state: str,
             activate=True):
         """
         Create a process for the instance, and add it to the env.
@@ -12,7 +12,7 @@ class FSM:
             # Create a process; add it to the env; and make it accessible on self.
             self.process = env.process(self.main(initial_state))
 
-    def main(self, initial_state):
+    def main(self, initial_state: str):
         """
         Each actor is/has a single process. This process instantiates a
         generator for the current state, and yields from it -- `yield from`
