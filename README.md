@@ -23,8 +23,11 @@ Design to try out
 -----------------
 
 - [x] ProcessFSM has a .process attribute, much like now.
-- [ ] SubstateFSM is a generator.
 - [x] `data` object is passed as arg to state methods.
+- [ ] keep a process log on the data object:
+      - ID is implicit
+      - time
+      - new state (possibly nested)
 
 
 Design space
