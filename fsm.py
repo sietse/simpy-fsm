@@ -1,42 +1,41 @@
 from types import SimpleNamespace
 
 
-if True:
-    def _trampoline(data, initial_state):
-        """Tie multiple subgenerators into one generator that passes control
-        between them.
+def _trampoline(data, initial_state):
+    """Tie multiple subgenerators into one generator that passes control
+    between them.
 
-        The trampoline generator starts by yielding from the first
-        subgenerator; when that subgenerator is done, it `return`s the next
-        generator function to yield from. This lets you write a multi-state
-        process as multiple subgenerators, one per state, that transition into
-        each other.
+    The trampoline generator starts by yielding from the first
+    subgenerator; when that subgenerator is done, it `return`s the next
+    generator function to yield from. This lets you write a multi-state
+    process as multiple subgenerators, one per state, that transition into
+    each other.
 
-        You can pass the resulting generator to Simpy's `env.process(...)` to
-        create a corresponding Simpy Process.
+    You can pass the resulting generator to Simpy's `env.process(...)` to
+    create a corresponding Simpy Process.
 
-        If this FSM represents substates in a hierarchical state machine, the
-        higher-level state can yield from the generator to pass control to this
-        substatemachine. `yield from substate_fsm._trampoline()`
+    If this FSM represents substates in a hierarchical state machine, the
+    higher-level state can yield from the generator to pass control to this
+    substatemachine. `yield from substate_fsm._trampoline()`
 
-        How this _trampoline() method works:
-        - It's a generator, so it can be passed to `env.process`.
-        - It delegates to the subgenerator (the current state method) via
-          `yield from state()`. This statement opens a two-way communication
-          channel between the subgenerator and Simpy's env simulation-runner.
-          When a state yields, it yields control to the Simpy environment.
-        - When a state is done, it can `return self.my_next_state` this returns
-          control to the _trampoline() function, which delegates to the new
-          subgenerator.
+    How this _trampoline() method works:
+    - It's a generator, so it can be passed to `env.process`.
+    - It delegates to the subgenerator (the current state method) via
+      `yield from state()`. This statement opens a two-way communication
+      channel between the subgenerator and Simpy's env simulation-runner.
+      When a state yields, it yields control to the Simpy environment.
+    - When a state is done, it can `return self.my_next_state` this returns
+      control to the _trampoline() function, which delegates to the new
+      subgenerator.
 
-        Example structure:
-        """
-        state = initial_state(data)
-        while True:
-            state_func = (yield from state)
-            if state_func is None:
-                break
-            state = state_func(data)
+    Example structure:
+    """
+    state = initial_state(data)
+    while True:
+        state_func = (yield from state)
+        if state_func is None:
+            break
+        state = state_func(data)
 
 
 class FSM:
