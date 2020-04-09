@@ -98,7 +98,7 @@ class SubstateFSM(_FSM):
         self.env = env
         # Create our generator, and make it accessible on self.
         self.generator = self._trampoline(
-            data=self.data,
+            data=data,
             initial_state=initial_state
         )
 
