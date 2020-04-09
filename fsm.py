@@ -1,9 +1,16 @@
 from types import SimpleNamespace
 
-class _FSM:
 
-    def _trampoline(self, data, initial_state: str):
-        """Create this state machine's generator.
+if True:
+    def _trampoline(data, initial_state):
+        """Tie multiple subgenerators into one generator that passes control
+        between them.
+
+        The trampoline generator starts by yielding from the first
+        subgenerator; when that subgenerator is done, it `return`s the next
+        generator function to yield from. This lets you write a multi-state
+        process as multiple subgenerators, one per state, that transition into
+        each other.
 
         You can pass the resulting generator to Simpy's `env.process(...)` to
         create a corresponding Simpy Process.
@@ -24,8 +31,7 @@ class _FSM:
 
         Example structure:
         """
-        state_func = getattr(self, initial_state)
-        state = state_func(data)
+        state = initial_state(data)
         while True:
             state_func = (yield from state)
             if state_func is None:
@@ -33,7 +39,7 @@ class _FSM:
             state = state_func(data)
 
 
-class FSM(_FSM):
+class FSM:
     """To write a Simpy process in finite state machine style, inherit from
     this class.
 
@@ -79,13 +85,13 @@ class FSM(_FSM):
         # Create `self.data` as a public handle of the `data` object
         self.data = data if data is not None else SimpleNamespace()
         # Create a process; add it to the env; and make it accessible on self.
-        self.process = env.process(self._trampoline(
+        self.process = env.process(_trampoline(
             data=self.data,
-            initial_state=initial_state
+            initial_state=getattr(self, initial_state)
         ))
 
 
-class SubstateFSM(_FSM):
+class SubstateFSM:
 
     def __init__(self, env: 'simpy.core.Environment', initial_state: str, data):
         """Init sub-state machine instance, and init its generator as
@@ -97,9 +103,9 @@ class SubstateFSM(_FSM):
 
         self.env = env
         # Create our generator, and make it accessible on self.
-        self.generator = self._trampoline(
+        self.generator = _trampoline(
             data=data,
-            initial_state=initial_state
+            initial_state=getattr(self, initial_state)
         )
 
 
