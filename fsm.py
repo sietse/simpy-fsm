@@ -1,7 +1,19 @@
 from types import SimpleNamespace
+from typing import Callable, Generator, TypeVar, Any, Optional, Iterator
+
+import simpy  # Only used for type annotations
 
 
-def _trampoline(data, initial_state):
+# Create a few helper aliases to prevent recursive type definitions:
+Data = Any
+
+FsmGenFunc = Callable[[Data], FsmGen]
+FsmGen = Generator[simpy.Event, Any, Any]
+
+def _trampoline(
+        data: Data,
+        initial_state: FsmGenFunc
+        ) -> FsmGen:
     """Tie multiple subgenerators into one generator that passes control
     between them.
 
@@ -30,12 +42,12 @@ def _trampoline(data, initial_state):
 
     Example structure:
     """
-    state = initial_state(data)
+    state: FsmGen = initial_state(data)
     while True:
-        state_func = (yield from state)
+        state_func: Optional[FsmGenFunc] = (yield from state)
         if state_func is None:
             break
-        state = state_func(data)
+        state: FsmGen = state_func(data)  # type: ignore
 
 
 class FSM:
