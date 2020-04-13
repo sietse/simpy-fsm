@@ -25,13 +25,13 @@ class Car:
                 # Create a generator for the new state
                 state = e.value()
 
-    def parking(self, data):
+    def parking(self):
         print("parking... at", self.env.now)
         parking_duration = 5
         yield self.env.timeout(parking_duration)
         return self.driving
 
-    def driving(self, data):
+    def driving(self):
         print("driving... at", self.env.now)
         driving_duration = 2
         yield self.env.timeout(driving_duration)

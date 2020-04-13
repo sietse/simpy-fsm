@@ -5,6 +5,7 @@
 python=/home/sietse/lib/miniconda3/envs/sim/bin/python
 
 $python nested_state_machine.py > /dev/null &&
+    $python simpy_statemachine.py > /dev/null &&
     $python simpy_2_charging.py > /dev/null &&
     $python simpy_3b_resource_manually.py > /dev/null &&
     $python simpy_3_resource.py > /dev/null &&
