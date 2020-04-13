@@ -1,6 +1,6 @@
 import simpy
 
-from fsm import FSM, SubstateFSM
+from simpy_fsm import FSM, SubstateFSM
 
 
 class TurnOn:

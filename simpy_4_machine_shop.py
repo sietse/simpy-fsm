@@ -19,7 +19,7 @@ import random
 
 import simpy
 
-from fsm import FSM, process_name
+from simpy_fsm import FSM, process_name
 
 
 RANDOM_SEED = 42

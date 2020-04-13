@@ -1,7 +1,7 @@
 import simpy
 import enum
 
-from fsm import FSM
+from simpy_fsm import FSM
 
 
 class Signal(enum.Enum):

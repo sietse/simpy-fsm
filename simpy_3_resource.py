@@ -1,6 +1,6 @@
 import simpy
 
-from fsm import FSM, process_name
+from simpy_fsm import FSM, process_name
 
 
 class Car(FSM):
