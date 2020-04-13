@@ -4,6 +4,8 @@
 
 python=/home/sietse/lib/miniconda3/envs/sim/bin/python
 
+cd examples
+
 $python nested_state_machine.py > /dev/null &&
     $python simpy_statemachine.py > /dev/null &&
     $python simpy_2_charging.py > /dev/null &&
