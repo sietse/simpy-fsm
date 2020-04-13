@@ -13,8 +13,16 @@ class Car(FSM):
     """Like Car, but handles the resource itself instead of with a context
     manager."""
 
-    def __init__(self, env, initial_state='driving', *,
-            name, charging_station, driving_time, charging_time):
+    def __init__(
+        self,
+        env,
+        initial_state="driving",
+        *,
+        name,
+        charging_station,
+        driving_time,
+        charging_time
+    ):
         self.name = name
         self.charging_station = charging_station
         self.driving_time = driving_time
@@ -23,14 +31,14 @@ class Car(FSM):
 
     def driving(self, data):
         yield env.timeout(self.driving_time)
-        print('%s arriving at %d' % (self.name, self.env.now))
+        print("%s arriving at %d" % (self.name, self.env.now))
         return self.awaiting_battery
 
     def awaiting_battery(self, data):
         # Wait for the charging station and acquire it
         self.charging_request = self.charging_station.request()
         yield self.charging_request
-        print('%s starting to charge at %s' % (self.name, self.env.now))
+        print("%s starting to charge at %s" % (self.name, self.env.now))
         # Instead of invisibly passing `charging_request` via `self` to
         # the `charging` state, can we make the flow of data clearer
         # by making `charging_request` part of the thunk we return?
@@ -45,7 +53,7 @@ class Car(FSM):
         # The charging station has been acquired;
         try:
             yield env.timeout(self.charging_time)
-            print('%s leaving the bcs at %s' % (self.name, self.env.now))
+            print("%s leaving the bcs at %s" % (self.name, self.env.now))
         finally:
             # import pudb
             # pudb.set_trace()
@@ -53,15 +61,16 @@ class Car(FSM):
         return self.driving
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     env = simpy.Environment()
     bcs = simpy.Resource(env, capacity=2)
     cars = [
-        Car(env,
+        Car(
+            env,
             name=process_name(i, of=4),
             charging_station=bcs,
             driving_time=i * 2,
-            charging_time=5
+            charging_time=5,
         )
         for i in range(4)
     ]

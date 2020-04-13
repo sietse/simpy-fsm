@@ -10,10 +10,8 @@ Data = Any
 FsmGenFunc = Callable[[Data], FsmGen]
 FsmGen = Generator[simpy.Event, Any, Any]
 
-def _trampoline(
-        data: Data,
-        initial_state: FsmGenFunc
-        ) -> FsmGen:
+
+def _trampoline(data: Data, initial_state: FsmGenFunc) -> FsmGen:
     """Tie multiple subgenerators into one generator that passes control
     between them.
 
@@ -86,8 +84,7 @@ class FSM:
     2
     """
 
-    def __init__(self, env: 'simpy.core.Environment', initial_state: str,
-            data=None):
+    def __init__(self, env: "simpy.core.Environment", initial_state: str, data=None):
         """Init state machine instance, and init its Process as
         `self.process`.
         """
@@ -96,15 +93,13 @@ class FSM:
         # Create `self.data` as a public handle of the `data` object
         self.data = data if data is not None else SimpleNamespace()
         # Create a process; add it to the env; and make it accessible on self.
-        self.process = env.process(_trampoline(
-            data=self.data,
-            initial_state=getattr(self, initial_state)
-        ))
+        self.process = env.process(
+            _trampoline(data=self.data, initial_state=getattr(self, initial_state))
+        )
 
 
 class SubstateFSM:
-
-    def __init__(self, env: 'simpy.core.Environment', initial_state: str, data):
+    def __init__(self, env: "simpy.core.Environment", initial_state: str, data):
         """Init sub-state machine instance, and init its generator as
         `self.generator`.
 
@@ -115,8 +110,7 @@ class SubstateFSM:
         self.env = env
         # Create our generator, and make it accessible on self.
         self.generator = _trampoline(
-            data=data,
-            initial_state=getattr(self, initial_state)
+            data=data, initial_state=getattr(self, initial_state)
         )
 
 
@@ -136,6 +130,6 @@ def process_name(i: int, of: int) -> str:
         0 | | | starting to charge at 7
         | 1 | | leaving the bcs at 9
     """
-    lines = ['|'] * of
+    lines = ["|"] * of
     lines[i] = str(i)
-    return ' '.join(lines)
+    return " ".join(lines)

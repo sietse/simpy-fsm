@@ -21,14 +21,14 @@ import simpy
 
 
 RANDOM_SEED = 42
-PT_MEAN = 10.0         # Avg. processing time in minutes
-PT_SIGMA = 2.0         # Sigma of processing time
-MTTF = 300.0           # Mean time to failure in minutes
+PT_MEAN = 10.0  # Avg. processing time in minutes
+PT_SIGMA = 2.0  # Sigma of processing time
+MTTF = 300.0  # Mean time to failure in minutes
 BREAK_MEAN = 1 / MTTF  # Param. for expovariate distribution
-REPAIR_TIME = 30.0     # Time it takes to repair a machine in minutes
-JOB_DURATION = 30.0    # Duration of other jobs in minutes
-NUM_MACHINES = 10      # Number of machines in the machine shop
-WEEKS = 4              # Simulation time in weeks
+REPAIR_TIME = 30.0  # Time it takes to repair a machine in minutes
+JOB_DURATION = 30.0  # Duration of other jobs in minutes
+NUM_MACHINES = 10  # Number of machines in the machine shop
+WEEKS = 4  # Simulation time in weeks
 SIM_TIME = WEEKS * 7 * 24 * 60  # Simulation time in minutes
 
 
@@ -51,6 +51,7 @@ class Machine(object):
     A machine has a *name* and a numberof *parts_made* thus far.
 
     """
+
     def __init__(self, env, name, repairman):
         self.env = env
         self.name = name
@@ -120,20 +121,19 @@ def other_jobs(env, repairman):
 
 
 # Setup and start the simulation
-print('Machine shop')
+print("Machine shop")
 random.seed(RANDOM_SEED)  # This helps reproducing the results
 
 # Create an environment and start the setup process
 env = simpy.Environment()
 repairman = simpy.PreemptiveResource(env, capacity=1)
-machines = [Machine(env, 'Machine %d' % i, repairman)
-            for i in range(NUM_MACHINES)]
+machines = [Machine(env, "Machine %d" % i, repairman) for i in range(NUM_MACHINES)]
 env.process(other_jobs(env, repairman))
 
 # Execute!
 env.run(until=SIM_TIME)
 
 # Analyis/results
-print('Machine shop results after %s weeks' % WEEKS)
+print("Machine shop results after %s weeks" % WEEKS)
 for machine in machines:
-    print('%s made %d parts.' % (machine.name, machine.parts_made))
+    print("%s made %d parts." % (machine.name, machine.parts_made))

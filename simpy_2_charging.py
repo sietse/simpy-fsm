@@ -9,12 +9,11 @@ class Signal(enum.Enum):
 
 
 class Car(FSM):
-
-    def __init__(self, env, initial_state='charging'):
+    def __init__(self, env, initial_state="charging"):
         super().__init__(env, initial_state)
 
     def charging(self, data):
-        print('Car: start parking and charging at', self.env.now)
+        print("Car: start parking and charging at", self.env.now)
         charge_duration = 5
         try:
             yield self.env.timeout(charge_duration)
@@ -27,26 +26,25 @@ class Car(FSM):
                 raise interrupt
 
     def driving(self, data):
-        print('Car: start driving at', self.env.now)
+        print("Car: start driving at", self.env.now)
         trip_duration = 2
         yield self.env.timeout(trip_duration)
         return self.charging
 
 
 class Driver(FSM):
-
-    def __init__(self, env, car, initial_state='impatient'):
+    def __init__(self, env, car, initial_state="impatient"):
         self.car = car
         super().__init__(env, initial_state)
 
     def impatient(self, data):
         yield self.env.timeout(3)
-        print('Driver: I want to drive now')
+        print("Driver: I want to drive now")
         self.car.process.interrupt(Signal.drive)
         return None
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     env = simpy.Environment()
     car = Car(env)
     driver = Driver(env, car)

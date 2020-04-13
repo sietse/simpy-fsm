@@ -3,27 +3,28 @@ import simpy
 from fsm import FSM, SubstateFSM
 
 
-
 class TurnOn:
     """This class is used by as a signal/symbol: Turn a stoplight on."""
+
     pass
 
 
 class TurnOff:
     """This class is used by as a signal/symbol: Turn a stoplight on."""
+
     pass
 
 
 class Stoplight(FSM):
     """A state machine: a stoplight you can turn on and off."""
 
-    def __init__(self, env, initial_state='off'):
+    def __init__(self, env, initial_state="off"):
         super().__init__(env, initial_state)
 
     def on(self, data):
-        data.state = 'on'
+        data.state = "on"
         try:
-            substate = StoplightOn(self.env, 'green', data)
+            substate = StoplightOn(self.env, "green", data)
             # Lesson 1: yielding the process of a nested state machine (NSM)
             # runs the NSM, but it doesn't delegate to it: any Interrupt is
             # sent to us, not to the nested process.
@@ -46,7 +47,7 @@ class Stoplight(FSM):
                 return self.off
 
     def off(self, data):
-        data.state = 'off'
+        data.state = "off"
         data.colour = None
         try:
             yield simpy.Timeout(self.env, 100)
@@ -64,22 +65,22 @@ class StoplightOn(SubstateFSM):
     """
 
     def green(self, data):
-        data.colour = 'green'
+        data.colour = "green"
         yield simpy.Timeout(self.env, 3)
         return self.yellow
 
     def yellow(self, data):
-        data.colour = 'yellow'
+        data.colour = "yellow"
         yield simpy.Timeout(self.env, 1)
         return self.red
 
     def red(self, data):
-        data.colour = 'red'
+        data.colour = "red"
         yield simpy.Timeout(self.env, 4)
         return self.green
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     env = simpy.Environment()
     stoplight = Stoplight(env)
     for i in range(2):
@@ -88,12 +89,12 @@ if __name__ == '__main__':
         # customize via Interrupt.cause.
         stoplight.process.interrupt(TurnOn)
         data = stoplight.data
-        print(f'{env.now}: {data.state} ({data.colour})')
+        print(f"{env.now}: {data.state} ({data.colour})")
         for i in range(12):
             env.run(until=env.now + 1)
-            print(f'{env.now}: {data.state} ({data.colour})')
+            print(f"{env.now}: {data.state} ({data.colour})")
         stoplight.process.interrupt(TurnOff)
-        print(f'{env.now}: {data.state} ({data.colour})')
+        print(f"{env.now}: {data.state} ({data.colour})")
         for i in range(12):
             env.run(until=env.now + 1)
-            print(f'{env.now}: {data.state} ({data.colour})')
+            print(f"{env.now}: {data.state} ({data.colour})")
