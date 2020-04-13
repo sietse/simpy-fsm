@@ -7,8 +7,8 @@ import simpy  # Only used for type annotations
 # Create a few helper aliases to prevent recursive type definitions:
 Data = Any
 
-FsmGenFunc = Callable[[Data], FsmGen]
 FsmGen = Generator[simpy.Event, Any, Any]
+FsmGenFunc = Callable[[Data], FsmGen]
 
 
 def _trampoline(data: Data, initial_state: FsmGenFunc) -> FsmGen:
