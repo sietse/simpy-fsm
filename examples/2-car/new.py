@@ -13,20 +13,20 @@ class Car(FSM):
         super().__init__(env, initial_state)
 
     def charging(self, data):
-        print("Car: start parking and charging at", self.env.now)
+        print("Car: start parking and charging at %d" % self.env.now)
         charge_duration = 5
         try:
             yield self.env.timeout(charge_duration)
             return self.driving
         except simpy.Interrupt as interrupt:
             if interrupt.cause is Signal.drive:
-                print("Car: rudely interrupted at {}!".format(self.env.now))
+                print('Car: Was interrupted at %d. Hope, the battery is full enough ...' % self.env.now)
                 return self.driving
             else:
                 raise interrupt
 
     def driving(self, data):
-        print("Car: start driving at", self.env.now)
+        print('Car: Start driving at %d' % self.env.now)
         trip_duration = 2
         yield self.env.timeout(trip_duration)
         return self.charging

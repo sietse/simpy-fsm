@@ -7,7 +7,7 @@ class Car(object):
 
     def run(self):
         while True:
-            print('Start parking and charging at %d' % self.env.now)
+            print('Car: Start parking and charging at %d' % self.env.now)
             charge_duration = 5
             # We may get interrupted while charging the battery
             try:
@@ -15,9 +15,9 @@ class Car(object):
             except simpy.Interrupt:
                 # When we received an interrupt, we stop charging and
                 # switch to the "driving" state
-                print('Was interrupted. Hope, the battery is full enough ...')
+                print('Car: Was interrupted at %d. Hope, the battery is full enough ...' % self.env.now)
 
-            print('Start driving at %d' % self.env.now)
+            print('Car: Start driving at %d' % self.env.now)
             trip_duration = 2
             yield self.env.timeout(trip_duration)
 
@@ -27,6 +27,7 @@ class Car(object):
 
 def driver(env, car):
     yield env.timeout(3)
+    print("Driver: I want to drive now")
     car.action.interrupt()
 
 
