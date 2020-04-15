@@ -1,11 +1,6 @@
 import simpy
-import enum
 
 from simpy_fsm import FSM
-
-
-class Signal(enum.Enum):
-    drive = 0
 
 
 class Car(FSM):
@@ -15,15 +10,15 @@ class Car(FSM):
     def charging(self, data):
         print("Car: start parking and charging at %d" % self.env.now)
         charge_duration = 5
+        # We may get interrupted while charging the battery
         try:
             yield self.env.timeout(charge_duration)
             return self.driving
         except simpy.Interrupt as interrupt:
-            if interrupt.cause is Signal.drive:
-                print('Car: Was interrupted at %d. Hope, the battery is full enough ...' % self.env.now)
-                return self.driving
-            else:
-                raise interrupt
+            # When we received an interrupt, we stop charging and
+            # switch to the "driving" state
+            print('Car: Was interrupted at %d. Hope, the battery is full enough ...' % self.env.now)
+            return self.driving
 
     def driving(self, data):
         print('Car: Start driving at %d' % self.env.now)
