@@ -50,13 +50,10 @@ class Car(FSM):
 
     def charging(self, data):
         # The charging station has been acquired;
-        try:
-            yield env.timeout(self.charging_time)
-            # BCS is the battery charging station
-            print("%s leaving the bcs at %s" % (self.name, self.env.now))
-        finally:
-            self.charging_station.release(self.charging_request)
-        return None
+        yield env.timeout(self.charging_time)
+        # BCS is the battery charging station
+        print("%s leaving the bcs at %s" % (self.name, self.env.now))
+        self.charging_station.release(self.charging_request)
 
 
 if __name__ == "__main__":
