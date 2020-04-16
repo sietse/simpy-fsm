@@ -13,7 +13,13 @@ There is a driver who gets impatient: 3 minutes after the driver's process is st
 
 When the car catches this interrupt, it switches from charging mode to driving mode.
 
-### Comparison
+### Comparing the process notation and the state machine notation.
+
+#### Brevity
+
+The Car process is about equally long written as a process, or as a state
+machine: 21-22 lines. For the driver process, the state machine notation adds
+about 6 lines of overhead, most of it instance initialization code.
 
 #### Number of processes per entity
 

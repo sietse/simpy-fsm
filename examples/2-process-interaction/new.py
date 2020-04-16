@@ -36,7 +36,6 @@ class Driver(FSM):
         yield self.env.timeout(3)
         print("Driver: I want to drive now")
         self.car.process.interrupt(Signal.drive)
-        return None
 
 
 if __name__ == "__main__":
