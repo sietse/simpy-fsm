@@ -2,7 +2,6 @@ import simpy
 
 from simpy_fsm import FSM, process_name
 
-
 class Car(FSM):
     def __init__(
         self,
@@ -32,8 +31,9 @@ class Car(FSM):
             # Charge the battery
             print("%s starting to charge at %s" % (self.name, self.env.now))
             yield env.timeout(self.charging_time)
+            # BCS is the battery charging station
             print("%s leaving the bcs at %s" % (self.name, self.env.now))
-            return self.driving
+            return None
 
 
 if __name__ == "__main__":

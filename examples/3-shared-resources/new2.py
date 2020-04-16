@@ -8,7 +8,6 @@ import simpy
 
 from simpy_fsm import FSM, process_name
 
-
 class Car(FSM):
     """Like Car, but handles the resource itself instead of with a context
     manager."""
@@ -46,19 +45,18 @@ class Car(FSM):
         #
         #     return (self.charging, charging_request)
         #
-        # which FSM._trampoline would then handle appropriately.
+        # which fsm.trampoline would then handle appropriately.
         return self.charging
 
     def charging(self, data):
         # The charging station has been acquired;
         try:
             yield env.timeout(self.charging_time)
+            # BCS is the battery charging station
             print("%s leaving the bcs at %s" % (self.name, self.env.now))
         finally:
-            # import pudb
-            # pudb.set_trace()
             self.charging_station.release(self.charging_request)
-        return self.driving
+        return None
 
 
 if __name__ == "__main__":
@@ -75,4 +73,4 @@ if __name__ == "__main__":
         for i in range(4)
     ]
 
-    env.run(until=15)
+    env.run()

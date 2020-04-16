@@ -1,6 +1,8 @@
 import simpy
+from simpy_fsm import process_name
 
 
+# BCS is the battery charging station
 def car(env, name, bcs, driving_time, charge_duration):
     # Simulate driving to the BCS
     yield env.timeout(driving_time)
@@ -20,6 +22,6 @@ if __name__ == "__main__":
     env = simpy.Environment()
     bcs = simpy.Resource(env, capacity=2)
     for i in range(4):
-        env.process(car(env, "Car %d" % i, bcs, i * 2, 5))
+        env.process(car(env, process_name(i, of=4), bcs, i * 2, 5))
 
     env.run()
