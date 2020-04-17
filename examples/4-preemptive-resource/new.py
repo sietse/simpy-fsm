@@ -37,8 +37,6 @@ NUM_MACHINES = 10  # Number of machines in the machine shop
 WEEKS = 4  # Simulation time in weeks
 SIM_TIME = WEEKS * 7 * 24 * 60  # Simulation time in minutes
 
-UNIMPORTANT_WORK_TIME = 7.0
-
 
 def time_per_part():
     """Return actual processing time for a concrete part."""
@@ -134,7 +132,7 @@ class UnimportantWork(FSM):
         super().__init__(env, initial_state)
 
     def prepare_work(self):
-        self.work_left = UNIMPORTANT_WORK_TIME  # how long the unimportant jobs take
+        self.work_left = JOB_DURATION  # how long the unimportant jobs take
 
     def finish_work_and_prepare_next(self):
         floating_point_error = self.work_left - 0
