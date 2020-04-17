@@ -158,11 +158,6 @@ class UnimportantWork(FSM):
             #     yielded back to us at the time our work is done, and we
             #     resume at *this* point in the code ...
 
-            # This is vulnerable to floating-point errors. See [1], below,
-            # for the explanation. For now, finish_work_and_prepare_next()
-            # resets self.work_left to 0
-            work_done = self.env.now - start
-            self.work_left = self.work_left - work_done
             self.finish_work_and_prepare_next()
             return self.working
 
@@ -173,6 +168,17 @@ class UnimportantWork(FSM):
         # We record where we were, and then try working again -- that will
         # start when we get our repairman back.
         except simpy.Interrupt:
+            # FIXME This is vulnerable to floating-point errors that may lead to
+            # negative work_left values. See [1], below, for the explanation.
+            # For now, `finish_work_and_prepare_next()` regularly resets
+            # self.work_left to 0
+            #
+            # FIXME There should be a lint that prevents any references
+            # to an `env` other than `self.env`: it's easy to forget the
+            # `self`, but doing so will lead to computing time from the wrong
+            # clock. For example, computing `self.work_left` using `start` from
+            # one clock, and `now` from another clock, may cause negative
+            # values and so negative timeouts...
             work_done = self.env.now - start
             self.work_left = self.work_left - work_done
             return self.awaiting_repairman
