@@ -3,7 +3,7 @@
 This example comes from the the Simpy docs, section "Simpy in 10
 Minutes", subsection ["Process Interaction"][1].
 
-[1] https://simpy.readthedocs.io/en/latest/simpy_intro/process_interaction.html
+[1]: https://simpy.readthedocs.io/en/latest/simpy_intro/process_interaction.html
 
 ### Scenario
 
