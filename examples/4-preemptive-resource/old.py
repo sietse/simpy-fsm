@@ -21,12 +21,16 @@ import simpy
 
 
 RANDOM_SEED = 42
+
 PT_MEAN = 10.0  # Avg. processing time in minutes
 PT_SIGMA = 2.0  # Sigma of processing time
+
 MTTF = 300.0  # Mean time to failure in minutes
 BREAK_MEAN = 1 / MTTF  # Param. for expovariate distribution
 REPAIR_TIME = 30.0  # Time it takes to repair a machine in minutes
+
 JOB_DURATION = 30.0  # Duration of other jobs in minutes
+
 NUM_MACHINES = 10  # Number of machines in the machine shop
 WEEKS = 4  # Simulation time in weeks
 SIM_TIME = WEEKS * 7 * 24 * 60  # Simulation time in minutes
@@ -34,7 +38,7 @@ SIM_TIME = WEEKS * 7 * 24 * 60  # Simulation time in minutes
 
 def time_per_part():
     """Return actual processing time for a concrete part."""
-    return random.normalvariate(PT_MEAN, PT_SIGMA)
+    return abs(random.normalvariate(PT_MEAN, PT_SIGMA))
 
 
 def time_to_failure():
