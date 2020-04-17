@@ -38,14 +38,18 @@ WEEKS = 4  # Simulation time in weeks
 SIM_TIME = WEEKS * 7 * 24 * 60  # Simulation time in minutes
 
 
+rng1 = random.Random()
 def time_per_part():
     """Return actual processing time for a concrete part."""
-    return abs(random.normalvariate(PT_MEAN, PT_SIGMA))
+    print('part')
+    return abs(rng1.normalvariate(PT_MEAN, PT_SIGMA))
 
 
+rng2 = random.Random()
 def time_to_failure():
     """Return time until next failure for a machine."""
-    return random.expovariate(BREAK_MEAN)
+    print('failure')
+    return rng2.expovariate(BREAK_MEAN)
 
 
 class Machine(FSM):
@@ -200,7 +204,10 @@ def snapshot(env, repairman, unimportant_work, machines):
 
 # Setup and start the simulation
 print("Machine shop")
-random.seed(RANDOM_SEED)  # This helps reproducing the results
+
+# This helps reproducing the results
+rng1.seed(RANDOM_SEED)
+rng2.seed(RANDOM_SEED)
 
 # Create an environment and start the setup process
 env = simpy.Environment()
