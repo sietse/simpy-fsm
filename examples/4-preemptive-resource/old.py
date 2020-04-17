@@ -19,6 +19,7 @@ import random
 
 import simpy
 
+from simpy_fsm import process_name
 
 RANDOM_SEED = 42
 
@@ -131,7 +132,7 @@ random.seed(RANDOM_SEED)  # This helps reproducing the results
 # Create an environment and start the setup process
 env = simpy.Environment()
 repairman = simpy.PreemptiveResource(env, capacity=1)
-machines = [Machine(env, "Machine %d" % i, repairman) for i in range(NUM_MACHINES)]
+machines = [Machine(env, process_name(i, of=NUM_MACHINES), repairman) for i in range(NUM_MACHINES)]
 env.process(other_jobs(env, repairman))
 
 # Execute!
