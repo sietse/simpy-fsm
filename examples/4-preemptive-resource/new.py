@@ -153,7 +153,7 @@ class UnimportantWork(FSM):
         start = self.env.now
         try:
             # Try to work on the job until it is done ...
-            x = yield env.timeout(self.work_left)
+            x = yield self.env.timeout(self.work_left)
             # ... (a) if the repairman is not called away, control is
             #     yielded back to us at the time our work is done, and we
             #     resume at *this* point in the code ...
