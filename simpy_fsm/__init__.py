@@ -40,12 +40,17 @@ def _trampoline(data: Data, initial_state: FsmGenFunc) -> FsmGen:
 
     Example structure:
     """
-    state: FsmGen = initial_state(data)
+    state_generator: FsmGen = initial_state(data)
     while True:
-        state_func: Optional[FsmGenFunc] = (yield from state)
+        # Inside the brackets: `yield from` connects the state's generator
+        # directly to our process's driver, a Simpy Environment.
+        #
+        # Eventually, the generator will `return`; at that point, control
+        # returns here, and we use the return value as the next state function.
+        state_func: Optional[FsmGenFunc] = (yield from state_generator)
         if state_func is None:
             break
-        state: FsmGen = state_func(data)  # type: ignore
+        state_generator: FsmGen = state_func(data)  # type: ignore
 
 
 class FSM:
