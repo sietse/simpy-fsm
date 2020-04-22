@@ -25,38 +25,42 @@ Compatibility: Most of the repository needs Python >= 3.3, because that's when u
 
 Here is an example
 
-    import simpy
+```python
+import simpy
 
-    def old_car(env):
-        while True:
-            parking_duration = 2
-            yield env.timeout(parking_duration)
-            driving_duration = 5
-            yield env.timeout(driving_duration)
+def old_car(env):
+    while True:
+        parking_duration = 2
+        yield env.timeout(parking_duration)
+        driving_duration = 5
+        yield env.timeout(driving_duration)
 
-    env = simpy.Environment()
-    env.process(old_car())
-    env.run(until=15)
+env = simpy.Environment()
+env.process(old_car())
+env.run(until=15)
+```
 
 into this:
 
-    import simpy
-    from simpy_fsm import FSM
+```python
+import simpy
+from simpy_fsm import FSM
 
-    class Car(FSM):
-        def parking(self):
-            parking_duration = 5
-            yield self.env.timeout(parking_duration)
-            return self.driving
+class Car(FSM):
+    def parking(self):
+        parking_duration = 5
+        yield self.env.timeout(parking_duration)
+        return self.driving
 
-        def driving(self):
-            driving_duration = 2
-            yield self.env.timeout(driving_duration)
-            return self.parking
+    def driving(self):
+        driving_duration = 2
+        yield self.env.timeout(driving_duration)
+        return self.parking
 
-    env = simpy.Environment()
-    car = Car(env, 'parking')
-    env.run(until=15)
+env = simpy.Environment()
+car = Car(env, 'parking')
+env.run(until=15)
+```
 
 
 ## How does it work?
@@ -68,18 +72,20 @@ This lets you write a multi-state process as multiple subgenerators, one per sta
 
 In the car example above, starting the trampoline and creating a Simpy process is handled by the FSM superclass.
 
-    def trampoline(data, initial_state):
-        state_generator = initial_state(data)
-        while True:
-            # Inside the brackets: `yield from` connects the state's generator
-            # directly to our process's driver, a Simpy Environment.
-            #
-            # Eventually, the generator will `return`; at that point, control
-            # returns here, and we use the return value as the next state function.
-            state_func = (yield from state_generator)
-            if state_func is None:
-                break
-            state_generator = state_func(data)
+```python
+def trampoline(data, initial_state):
+    state_generator = initial_state(data)
+    while True:
+        # Inside the brackets: `yield from` connects the state's generator
+        # directly to our process's driver, a Simpy Environment.
+        #
+        # Eventually, the generator will `return`; at that point, control
+        # returns here, and we use the return value as the next state function.
+        state_func = (yield from state_generator)
+        if state_func is None:
+            break
+        state_generator = state_func(data)
+```
 
 
 ## Open design questions

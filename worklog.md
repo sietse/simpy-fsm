@@ -47,12 +47,14 @@ Questions/dimensions:
 
 - [ ] The FSM *is* a Process
 
+    ```python
     # Awaiting a new car process
     yield Car()
 
     # Creating a new car
     car1 = Car()
     car1.interrupt()
+    ```
 
   - No need to remember which object to address
   - Mixes the state machine behaviour and the Process interface together
@@ -67,12 +69,14 @@ Questions/dimensions:
 
 - [ ] Instantiating the FSM automatically instantiates the process
 
+    ```python
     # Awaiting a new car process
     yield Car().process
 
     # Creating a new car
     car1 = Car()
     car1.process.interrupt
+    ```
 
   - Keeps separate FSM and Process APIs as 2 separate objects.
   - Can always get process from FSM -- no need for separate table.
@@ -82,6 +86,7 @@ Questions/dimensions:
 
 - [ ] Create the process manually from the generator
 
+    ```python
     # Awaiting a new car process
     yield env.process(Car().generator)
 
@@ -94,6 +99,7 @@ Questions/dimensions:
     car1 = Car()
     car1.process = env.process(car1.generator)
     car1.process.interrupt()
+    ```
 
   - User must keep track of FSM + process pair
   - Makes process creation mechanism explicit
@@ -104,6 +110,7 @@ Questions/dimensions:
 
 - [ ] Create the process manually from the generator function
 
+    ```python
     # Awaiting a new car process
     yield env.process(Car().generator)
 
@@ -116,6 +123,7 @@ Questions/dimensions:
     car1 = Car()
     car1.process = env.process(car1.main())
     car1.process.interrupt()
+    ```
 
   - Most explicitest about process creation mechanism
   - Reserved name `main`, used only in process init incantation
@@ -127,16 +135,22 @@ Questions/dimensions:
 
 - [ ] The FSM instance is a generator
 
+    ```python
     yield from StoplightOn()
+    ```
 
 - [ ] The FSM instance has a generator
 
+    ```python
     yield from StoplightOn().generator
+    ```
 
 - [ ] The FSM instance has a generator function that the caller turns into a
   generator.
 
+    ```python
     yield from StoplightOn().main()
+    ```
 
 
 ### 3. FSM: where does an FSM's associated data live?
@@ -183,38 +197,42 @@ Solved challenge: negative delays
 
 Run simpy_4_machine_shop.py. Expected behaviour: no errors. Observed behaviour:
 
-    ValueError: Negative delay -29.08065477559603
+```python
+ValueError: Negative delay -29.08065477559603
+```
 
 What causes this bug? This is where and how the bug happens (simplified)
 
-    class UnimportantWork:
-        def working(self):
+```python
+class UnimportantWork:
+    def working(self):
 
-            # BUG step 1: waiting for the repair person is not the
-            # same as working
-            start = self.env.now
+        # BUG step 1: waiting for the repair person is not the
+        # same as working
+        start = self.env.now
 
-            with self.repairman.request(priority=2) as req:
-                yield req  # Wait until we get a repairman
+        with self.repairman.request(priority=2) as req:
+            yield req  # Wait until we get a repairman
 
-                # BUG mitigation: here is where we should record the `start` time.
+            # BUG mitigation: here is where we should record the `start` time.
 
-                try:
+            try:
 
-                    # BUG step 3: Try to wait for a negative `work_left` time.
-                    # Try to work on the job until it is done ...
-                    yield env.timeout(self.work_left)
+                # BUG step 3: Try to wait for a negative `work_left` time.
+                # Try to work on the job until it is done ...
+                yield env.timeout(self.work_left)
 
-                except simpy.Interrupt:
+            except simpy.Interrupt:
 
-                    # BUG step 2: `now - start` is more than `work left`,
-                    # because we add the time we were waiting for the
-                    # repairperson. As a result `self.work_left` is set to a
-                    # negative value.
-                    work_done = self.env.now - start
-                    self.work_left = self.work_left - work_done
+                # BUG step 2: `now - start` is more than `work left`,
+                # because we add the time we were waiting for the
+                # repairperson. As a result `self.work_left` is set to a
+                # negative value.
+                work_done = self.env.now - start
+                self.work_left = self.work_left - work_done
 
-                    return self.working
+                return self.working
+```
 
 The solution: move `start = self.env.now` until just after `yield req`. The
 unimportant work only starts/resumes once our request for a repairman is
@@ -248,6 +266,7 @@ http://simpy.readthedocs.io/en/latest/simpy_intro/process_interaction.html?highl
 http://simpy.readthedocs.io/en/latest/topical_guides/process_interaction.html#sleep-until-woken-up
 
 Design a Task class
+-------------------
 
 * When you start the task, it has state 'running'
 * When the running task yields, it will be awoken when 'work_remaining' will be 0
@@ -269,28 +288,36 @@ kind of implicit. This is what happens when a process suspends:
 
 For example, resumption could be triggered by a resource becoming availabe:
 
-    with repairman.request(priority=2) as req:
-        yield req
+```python
+with repairman.request(priority=2) as req:
+    yield req
+```
 
 Alternatively, passivate by awaiting an event
 
-    yield some_event
+```python
+yield some_event
+```
 
 The worker can then reactivate the task by triggering that event when she
 becomes available.
 
-    some_event.trigger()
+```python
+some_event.trigger()
+```
 
 Alternatively alternatively, send two interrupts:
 `myprocess.interrupt('suspend')` and `myprocess.interrupt('resume')`, which
 can be differentiated by examining `myinterrupt.cause`.
 
-    try:
-        yield env.timeout(...)
-    except simpy.Interrupt as signal:
-        if signal.cause == 'suspend':
-            ...
-        if signal.cause == 'resume':
-            ...
-        else:
-            raise
+```python
+try:
+    yield env.timeout(...)
+except simpy.Interrupt as signal:
+    if signal.cause == 'suspend':
+        ...
+    if signal.cause == 'resume':
+        ...
+    else:
+        raise
+```
