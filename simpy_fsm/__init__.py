@@ -38,7 +38,24 @@ def _trampoline(data: Data, initial_state: FsmGenFunc) -> FsmGen:
       control to the _trampoline() function, which delegates to the new
       subgenerator.
 
-    Example structure:
+    Example usage:
+
+        SimpleNamespace(count=1)
+
+        def f1(data):
+            yield "One"
+            data.count += 1
+            if 7 < data.count:
+                return
+            return f2
+
+        def f2(data):
+            yield "Two"
+            data.count += 2
+            return f1
+
+        process = _trampoline(None, f1)
+        # yields "One", "Two", "One", ...; stops after the counter reaches 7
     """
     state_generator: FsmGen = initial_state(data)
     while True:
