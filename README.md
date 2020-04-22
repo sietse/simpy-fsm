@@ -24,7 +24,7 @@ Compatibility: Most of the repository needs Python >= 3.3, because that's when u
 
 ## Example
 
-Here is an example
+Here is a simple Simpy process that simulates a car with two states: parking and driving.
 
 ```python
 import simpy
@@ -41,7 +41,7 @@ env.process(old_car())
 env.run(until=15)
 ```
 
-into this:
+Rephrasing it as a state machine looks like this:
 
 ```python
 import simpy
