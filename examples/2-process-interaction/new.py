@@ -35,7 +35,7 @@ class Driver(FSM):
     def impatient(self, data):
         yield self.env.timeout(3)
         print("Driver: I want to drive now")
-        self.car.process.interrupt(Signal.drive)
+        self.car.process.interrupt()
 
 
 if __name__ == "__main__":

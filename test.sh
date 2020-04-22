@@ -2,15 +2,16 @@
 
 # Test all scripts
 
-python=/home/sietse/lib/miniconda3/envs/sim/bin/python
+repo_root="$(pwd)"
 
-cd examples
-
-$python nested_state_machine.py > /dev/null &&
-    $python simpy_statemachine.py > /dev/null &&
-    $python simpy_2_charging.py > /dev/null &&
-    $python simpy_3b_resource_manually.py > /dev/null &&
-    $python simpy_3_resource.py > /dev/null &&
-    $python simpy_4_machine_shop.py > /dev/null &&
+python "$repo_root/examples/2-process-interaction/old.py" &&
+    python "$repo_root/examples/2-process-interaction/new.py" &&
+    python "$repo_root/examples/3-shared-resources/old.py" &&
+    python "$repo_root/examples/3-shared-resources/new1.py" &&
+    python "$repo_root/examples/3-shared-resources/new2.py" &&
+    python "$repo_root/examples/4-preemptive-resource/old.py" &&
+    python "$repo_root/examples/4-preemptive-resource/new.py" &&
+    python "$repo_root/examples/nested_state_machine.py" &&
+    python "$repo_root/examples/standalone_example.py" &&
     echo "Success" ||
     echo "Error"

@@ -41,14 +41,12 @@ SIM_TIME = WEEKS * 7 * 24 * 60  # Simulation time in minutes
 rng1 = random.Random()
 def time_per_part():
     """Return actual processing time for a concrete part."""
-    print('part')
     return abs(rng1.normalvariate(PT_MEAN, PT_SIGMA))
 
 
 rng2 = random.Random()
 def time_to_failure():
     """Return time until next failure for a machine."""
-    print('failure')
     return rng2.expovariate(BREAK_MEAN)
 
 

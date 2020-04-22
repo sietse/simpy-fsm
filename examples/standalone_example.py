@@ -28,7 +28,6 @@ class Car:
                 yield next(state_generator)
             except Transition as e:
                 # The state has ended, and told us what state to transition to.
-                # Create a generator for the new state
                 state_generator = e.to()
 
     def parking(self):
