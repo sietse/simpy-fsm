@@ -1,6 +1,7 @@
 ## Simpy and Finite State Machines.
 
-This repository explores continuation passing to break complex Simpy processes into flat (or hierarchical) state machines. The resulting code has one method per state, and uses a trampoline function to compose the methods into a single process.
+This repository explores using continuation passing style to break complex Simpy processes into flat (or hierarchical) state machines.
+The resulting code has one method per state, and uses a trampoline function to compose the methods into a single process.
 
 The more states a Simpy process has, and the more complicated the transition paths
 between them, the more you're going to get out of switching to state machine
