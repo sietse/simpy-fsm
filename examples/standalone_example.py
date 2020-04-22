@@ -1,9 +1,5 @@
 import simpy
 
-class Transition(Exception):
-    def __init__(self, to):
-        self.to = to
-
 
 def old_car(env):
     while True:
@@ -11,6 +7,11 @@ def old_car(env):
         yield env.timeout(parking_duration)
         driving_duration = 5
         yield env.timeout(driving_duration)
+
+
+class Transition(Exception):
+    def __init__(self, to):
+        self.to = to
 
 
 class Car:
