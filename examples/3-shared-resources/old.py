@@ -1,5 +1,5 @@
 import simpy
-from simpy_fsm import process_name
+from simpy_fsm.v1 import process_name
 
 
 # BCS is the battery charging station

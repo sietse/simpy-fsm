@@ -1,6 +1,6 @@
 import simpy
 
-from simpy_fsm import FSM
+from simpy_fsm.v1 import FSM
 
 
 class Car(FSM):
