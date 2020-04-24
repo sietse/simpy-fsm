@@ -1,0 +1,69 @@
+
+participant User
+participant "Simpy Environment" as Simpy
+participant "Process / car / trampoline" as Trampoline
+participant car.parking as State_A 
+participant car.driving as State_B
+
+User ->+ Simpy: init
+activate User
+User ->+ Trampoline: init(parking)
+note over Trampoline: next state: parking
+User ->+ Simpy: run
+deactivate User
+Simpy ->+ Trampoline: resume
+deactivate Simpy
+
+
+
+
+Trampoline ->+ State_A: init & yield from
+deactivate Trampoline
+activate State_A
+State_A -->+ Simpy: yield timeout
+deactivate State_A
+
+Simpy -->- State_A: resume (timeout complete)
+activate State_A
+
+State_A ->- Trampoline: return self.parking
+deactivate State_A
+activate Trampoline
+note over Trampoline: next state: parking
+
+Trampoline ->+ State_B: init & yield from
+deactivate Trampoline
+activate State_B
+
+State_B -->+ Simpy: yield 'wait for event'
+deactivate State_B
+
+Simpy -->- State_B: resume (event complete)
+activate State_B
+
+State_B ->- Trampoline: return self.driving
+deactivate State_B
+activate Trampoline
+note over Trampoline: next state: driving
+
+Trampoline ->+ State_A: init & yield from
+deactivate Trampoline
+activate State_A 
+
+State_A -->+ Simpy: yield timeout
+deactivate State_A
+
+Simpy -->- State_A: interrupt
+activate State_A
+
+State_A ->- Trampoline: return None
+deactivate State_A
+activate Trampoline
+note over Trampoline: next state: None
+
+Trampoline ->- Simpy: StopIteration
+deactivate Trampoline
+activate Simpy
+Simpy -> User: done
+deactivate Simpy
+activate User
