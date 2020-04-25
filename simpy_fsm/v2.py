@@ -11,7 +11,7 @@ FsmGen = Generator[simpy.Event, Any, Any]
 FsmGenFunc = Callable[[Data], FsmGen]
 
 
-def _trampoline(data: Data, initial_state: FsmGenFunc) -> FsmGen:
+def _trampoline(initial_state: FsmGenFunc, args, kwargs) -> FsmGen:
     """Tie multiple subgenerators into one generator that passes control
     between them.
 
@@ -57,17 +57,17 @@ def _trampoline(data: Data, initial_state: FsmGenFunc) -> FsmGen:
         process = _trampoline(None, f1)
         # yields "One", "Two", "One", ...; stops after the counter reaches 7
     """
-    state_generator: FsmGen = initial_state(data)
+    state_generator: FsmGen = initial_state(*args, **kwargs)
     while True:
         # Inside the brackets: `yield from` connects the state's generator
         # directly to our process's driver, a Simpy Environment.
         #
         # Eventually, the generator will `return`; at that point, control
         # returns here, and we use the return value as the next state function.
-        state_func: Optional[FsmGenFunc] = (yield from state_generator)
+        state_func, args, kwargs = (yield from state_generator)
         if state_func is None:
             break
-        state_generator: FsmGen = state_func(data)  # type: ignore
+        state_generator: FsmGen = state_func(*args, **kwargs)  # type: ignore
 
 
 class FSM:
@@ -79,18 +79,18 @@ class FSM:
     >>> class Car(FSM):
     >>>     '''Drive for 1 hour, park for 11 hours, repeat'''
     >>>
-    >>>     def driving(self, data):
+    >>>     def driving(self, *args, **kwargs):
     >>>         yield self.env.Timeout(1)
     >>>         data.n_trips = getattr(data, 'n_trips', 0) + 1
-    >>>         return self.parked
+    >>>         return self.parked, [], {}
     >>>
-    >>>     def self.parked(self, data)
+    >>>     def self.parked(self, *args, **kwargs)
     >>>         try:
     >>>             yield self.env.timeout(11)
     >>>             return self.driving
     >>>         except simpy.Interrupt as interrupt:
     >>>             if interrupt.cause == 'Get driving':
-    >>>                 return self.driving
+    >>>                 return self.driving, [], {}
 
     This is how you use it:
 
@@ -106,22 +106,28 @@ class FSM:
     2
     """
 
-    def __init__(self, env: "simpy.core.Environment", initial_state: str, data=None):
+    def __init__(self, env: "simpy.core.Environment", initial_state: str, args=None, kwargs=None):
         """Init state machine instance, and init its Process as
         `self.process`.
         """
 
         self.env = env
         # Create `self.data` as a public handle of the `data` object
-        self.data = data if data is not None else SimpleNamespace()
+        args = args if args is not None else ()
+        kwargs = kwargs if kwargs is not None else {}
         # Create a process; add it to the env; and make it accessible on self.
         self.process = env.process(
-            _trampoline(data=self.data, initial_state=getattr(self, initial_state))
+            _trampoline(
+                initial_state=getattr(self, initial_state),
+                args=args,
+                kwargs=kwargs,
+            )
         )
 
 
 class SubstateFSM:
-    def __init__(self, env: "simpy.core.Environment", initial_state: str, data):
+    def __init__(self, env: "simpy.core.Environment", initial_state: str, *args,
+            **kwargs):
         """Init sub-state machine instance, and init its generator as
         `self.generator`.
 
@@ -131,8 +137,12 @@ class SubstateFSM:
 
         self.env = env
         # Create our generator, and make it accessible on self.
+        args = args if args is not None else ()
+        kwargs = kwargs if kwargs is not None else {}
         self.generator = _trampoline(
-            data=data, initial_state=getattr(self, initial_state)
+            initial_state=getattr(self, initial_state),
+            args=args,
+            kwargs=kwargs
         )
 
 
