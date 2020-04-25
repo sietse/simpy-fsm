@@ -11,7 +11,7 @@ FsmGen = Generator[simpy.Event, Any, Any]
 FsmGenFunc = Callable[[Data], FsmGen]
 
 
-def _trampoline(initial_state: FsmGenFunc, *args, **kwargs) -> FsmGen:
+def _trampoline(initial_state: FsmGenFunc) -> FsmGen:
     """Tie multiple subgenerators into one generator that passes control
     between them.
 
@@ -42,45 +42,32 @@ def _trampoline(initial_state: FsmGenFunc, *args, **kwargs) -> FsmGen:
 
         SimpleNamespace(count=1)
 
-        def f1(data):
+        def f1(self):
             yield "One"
-            data.count += 1
-            if 7 < data.count:
+            self.count += 1
+            if 7 < self.count:
                 return
             return f2
 
-        def f2(data):
+        def f2(self):
             yield "Two"
-            data.count += 2
+            self.count += 2
             return f1
 
         process = _trampoline(None, f1)
         # yields "One", "Two", "One", ...; stops after the counter reaches 7
     """
-    state_generator: FsmGen = initial_state(*args, **kwargs)
+    state_generator: FsmGen = initial_state()
     while True:
         # Inside the brackets: `yield from` connects the state's generator
         # directly to our process's driver, a Simpy Environment.
         #
         # Eventually, the generator will `return`; at that point, control
         # returns here, and we use the return value as the next state function.
-        continuation = (yield from state_generator)
-        if isinstance(continuation, tuple):
-            if 4 <= len(continuation):
-                raise ValueError
-            if len(continuation) == 3:
-                state_func, args, kwargs = continuation
-            elif len(continuation) == 2:
-                state_func, args = continuation
-                kwargs = {}
-            elif len(continuation) == 1:
-                state_func, = continuation  # Unpack a 1-tuple (note the comma!)
-                args, kwargs = (), {}
-        else:
-            state_func, args, kwargs = continuation, (), {}
+        state_func = (yield from state_generator)
         if state_func is None:
             break
-        state_generator: FsmGen = state_func(*args, **kwargs)  # type: ignore
+        state_generator: FsmGen = state_func()  # type: ignore
 
 
 class FSM:
@@ -92,12 +79,12 @@ class FSM:
     >>> class Car(FSM):
     >>>     '''Drive for 1 hour, park for 11 hours, repeat'''
     >>>
-    >>>     def driving(self, *args, **kwargs):
+    >>>     def driving(self)
     >>>         yield self.env.Timeout(1)
-    >>>         data.n_trips = getattr(data, 'n_trips', 0) + 1
+    >>>         self.n_trips = getattr(self, 'n_trips', 0) + 1
     >>>         return self.parked, [], {}
     >>>
-    >>>     def self.parked(self, *args, **kwargs)
+    >>>     def self.parked(self)
     >>>         try:
     >>>             yield self.env.timeout(11)
     >>>             return self.driving
@@ -111,15 +98,15 @@ class FSM:
     >>> env = simpy.Environment
     >>> car1 = Car(env, initial_state='parked')  # also creates a Simpy process
     >>> env.run(until=13)
-    >>> car1.data.n_trips
+    >>> car1.n_trips
     1
     >>> car1.process.interrupt('Get driving') # interrupt the Simpy process
     >>> env.run(until=15)
-    >>> car1.data.n_trips
+    >>> car1.n_trips
     2
     """
 
-    def __init__(self, env: "simpy.core.Environment", initial_state: str, *args, **kwargs):
+    def __init__(self, env: "simpy.core.Environment", initial_state: str):
         """Init state machine instance, and init its Process as
         `self.process`.
         """
@@ -127,30 +114,20 @@ class FSM:
         self.env = env
         # Create a process; add it to the env; and make it accessible on self.
         self.process = env.process(
-            _trampoline(
-                initial_state=getattr(self, initial_state),
-                *args,
-                **kwargs
-            )
+            _trampoline(initial_state=getattr(self, initial_state))
         )
 
 
 class SubstateFSM:
-    def __init__(self, env: "simpy.core.Environment", initial_state: str, *args,
-            **kwargs):
+    def __init__(self, env: "simpy.core.Environment", initial_state: str):
         """Init sub-state machine instance, and init its generator as
         `self.generator`.
-
-        data: Any
-            The parent's `data` object
         """
 
         self.env = env
         # Create our generator, and make it accessible on self.
         self.generator = _trampoline(
             initial_state=getattr(self, initial_state),
-            *args,
-            **kwargs
         )
 
 

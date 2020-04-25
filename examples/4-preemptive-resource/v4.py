@@ -100,13 +100,13 @@ class Machine(FSM):
         # Request a repairman. This will preempt the UnimportantWork that
         # otherwise occupies the repairman.
         self.broken = True
-        repairman_request = self.repairman.request(priority=1)
-        yield repairman_request
-        return self.being_repaired, (repairman_request, )
+        self.repairman_request = self.repairman.request(priority=1)
+        yield self.repairman_request
+        return self.being_repaired
 
-    def being_repaired(self, repairman_request):
+    def being_repaired(self):
         yield self.env.timeout(REPAIR_TIME)
-        self.repairman.release(repairman_request)
+        self.repairman.release(self.repairman_request)
         return self.working
 
 
