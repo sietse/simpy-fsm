@@ -82,7 +82,6 @@ class Machine(FSM):
 
         While making a part, the machine may break multiple times.
         Request a repairman when this happens.
-
         """
         self.broken = False
         start = self.env.now
