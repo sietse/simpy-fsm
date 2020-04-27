@@ -1,3 +1,9 @@
+"""
+Simpy FSM variant 2:
+    - State method initialized with (self, args, kwargs)
+    - State method eventually returns (next state method, args, kwargs)
+"""
+
 from types import SimpleNamespace
 from typing import Callable, Generator, TypeVar, Any, Optional, Iterator
 

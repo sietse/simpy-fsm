@@ -1,3 +1,12 @@
+"""
+Simpy FSM variant 3:
+    - State method initialized with (self, *args, **kwargs)
+    - State method eventually returns Union[
+         (next state method, args, kwargs),
+         (next state method, args),
+         (next state method, )
+      ]
+"""
 from types import SimpleNamespace
 from typing import Callable, Generator, TypeVar, Any, Optional, Iterator
 
