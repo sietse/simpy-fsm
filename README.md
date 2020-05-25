@@ -236,26 +236,27 @@ generator.
 
 ## Open design questions
 
-- How shall we make sure that a nested FSM does not overwrite its parent's `state` variable, but appends the substate to the `state` list?
+- How shall we make sure that a nested FSM does not overwrite its parent's
+  `state` variable, but appends the substate to the `state` list?
+  ([#1](https://github.com/sietse/simpy-fsm/issues/1))
 
-- Should the trampoline function always update the `obj.state` variable, or should we also offer a minimalist FSM class for people who Want To Go Fast?
+- Should the trampoline function always update the `obj.state` variable, or should we also offer a minimalist FSM class for people who Want To Go Fast? ([#2](https://github.com/sietse/simpy-fsm/issues/2))
 
-- Should the trampoline function only be used as part of the FSM class, or should we make it public for people who want to compose multiple generators but don't want a class?
+- Should the trampoline function only be used as part of the FSM class, or should we make it public for people who want to compose multiple generators but don't want a class? ([#3](https://github.com/sietse/simpy-fsm/issues/3))
 
-- How to pass data around / what should the signature of every state be?
+- How to pass data around / what should the signature of every state be? ([#4](https://github.com/sietse/simpy-fsm/issues/4))
   - `mystate(self) -> next_state`: pass data by mutating self; for CSMs (child state machines), parent sets `nsm.parent = self`.
   - `mystate(self, obj) -> next_state`: `obj` is the object representing the process/entity/actor: for top-level FSMs `obj` is `self`, but for CSMs `obj` is `parent`
   - `mystate(self, data) -> next_state`: usually `obj` is `self`, but for CSMs `obj` is `parent`
   - `mystate(self, arg1, arg2, kwarg3=...) -> next_state, next_state_args, next_state_kwargs`
 
-- Should we use `return self.next_state` or `raise Transition(self.next_state)`?
-  The former is less noisy, the latter is Python 2-compatible.
+- Should we use `return self.next_state` or `raise Transition(self.next_state)`? ([#5](https://github.com/sietse/simpy-fsm/issues/5))
+  The former is less noisy, the latter is Python 2-compatible.  
 
-- Should we choose `yield from mysubstate.generator` or `yield from mysubstate`?
+
+- Should we choose `yield from mysubstate.generator` or `yield from mysubstate`? ([#6](https://github.com/sietse/simpy-fsm/issues/6))
   In other words: should the `mysubstate` instance _have_ a generator, or _be_ a generator?
 
-- TODO: benchmark the relative performance of a Simpy function, an FSM instance, and a DIY 'trampoline + generator functions' construction with no object.
+- TODO: benchmark the relative performance of a Simpy function, an FSM instance, and a DIY 'trampoline + generator functions' construction with no object. ([#7](https://github.com/sietse/simpy-fsm/issues/7))
 
-- TODO: benchmark the relative performance of an FSM instance with 4 states, and a hierarchical state machine where some of the states are moved onto a child FSM.
-
-- TODO: make issues for the questions above.
+- TODO: benchmark the relative performance of an FSM instance with 4 states, and a hierarchical state machine where some of the states are moved onto a child FSM. ([#8](https://github.com/sietse/simpy-fsm/issues/8))
