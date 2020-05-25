@@ -1,13 +1,10 @@
 ## Simpy and Finite State Machines.
 
-This repository shows how to write complex Simpy process as a flat state
-machine with one method per state, instead of as nested loops and try-blocks.
+This repository shows how to write complex Simpy process as a flat state machine class with one method per state, instead of as a single function with nested loops and try-blocks.
 
-The more states a Simpy process has, and the more complicated the transition paths
-between them, the more you're going to get out of switching to state machine
-notation.
+The more states a Simpy process has, and the more complicated the transition paths between them, the more you may get out of state machine notation. Returning the next state is a clearer way to specify a transition than breaking out of a loop, setting a sentinel variable, or treating another state as a child process. But for simple processes, state machine notation is probably overkill.
 
-I'm still exploring the design space, so the repository contains multiple implementations that differ in their internals and/or their method signatures. Feedback is welcome! Leave a comment on this repo, or e-mail sbbrouwer@gmail.com
+I'm still exploring the design space, so the repository contains multiple implementations that differ in their internals and/or their method signatures. Feedback is welcome! Leave a comment on this repo, or e-mail sbbrouwer@gmail.com.
 
 
 ## Example
@@ -21,6 +18,7 @@ Here is a simple Simpy process that simulates a car with two states: parking and
 <table><tr> <td>
 Traditional Simpy process function:
 
+<!-- The blank lines at the end are to make the code blocks equally tall. -->
 ```python
 import simpy
 
@@ -86,6 +84,7 @@ process. You can find the full example at
 <table><tr><td>
 Traditional Simpy process function:
 
+<!-- The blank lines at the end are to make the code blocks equally tall. -->
 ```python
 import simpy
 
@@ -191,6 +190,8 @@ The purpose of this repository is to explore the design space for a finite state
 - Exposing the current state for inspection
 - Passing data from state to state
 - Making sure the two items above work for hierarchical state machines, too.
+
+Relevant files in this repository:
 
 - `simpy_fsm/`: installed with `pip install PATH_TO_REPO_ROOT/setup.py`, use with `from simpy_fsm import FSM, SubstateFSM`. Needs Python 3.3 or later.
 - `examples/standalone_example.py`: a small self-contained example file that contains both an example state machine _and_ the definition of its a trampoline function. Works in Python 2+3
