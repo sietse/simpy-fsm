@@ -1,0 +1,49 @@
+old.py
+0.59user 0.08system 0:00.68elapsed 99%CPU (0avgtext+0avgdata 17808maxresident)k
+0inputs+0outputs (0major+2971minor)pagefaults 0swaps
+
+new1.py
+0.56user 0.11system 0:00.69elapsed 98%CPU (0avgtext+0avgdata 17928maxresident)k
+0inputs+0outputs (0major+3022minor)pagefaults 0swaps
+
+new2.py
+0.57user 0.11system 0:00.69elapsed 98%CPU (0avgtext+0avgdata 17788maxresident)k
+0inputs+0outputs (0major+3063minor)pagefaults 0swaps
+
+new5_ifs.py
+0.69user 0.10system 0:00.80elapsed 99%CPU (0avgtext+0avgdata 17820maxresident)k
+0inputs+0outputs (0major+3022minor)pagefaults 0swaps
+
+new1.py
+4.98user 0.75system 0:05.86elapsed 97%CPU (0avgtext+0avgdata 17896maxresident)k
+0inputs+0outputs (0major+3019minor)pagefaults 0swaps
+
+new2.py
+0.70user 0.09system 0:00.80elapsed 99%CPU (0avgtext+0avgdata 17796maxresident)k
+0inputs+0outputs (0major+3059minor)pagefaults 0swaps
+
+new5_ifs.py
+0.51user 0.09system 0:00.63elapsed 96%CPU (0avgtext+0avgdata 17788maxresident)k
+0inputs+0outputs (0major+3025minor)pagefaults 0swaps
+
+old.py
+0.61user 0.06system 0:00.70elapsed 97%CPU (0avgtext+0avgdata 17748maxresident)k
+0inputs+0outputs (0major+2968minor)pagefaults 0swaps
+
+-----------
+
+new1.py
+5.53user 0.70system 0:06.30elapsed 98%CPU (0avgtext+0avgdata 17836maxresident)k
+0inputs+0outputs (0major+3021minor)pagefaults 0swaps
+
+new2.py
+4.92user 0.78system 0:05.84elapsed 97%CPU (0avgtext+0avgdata 17748maxresident)k
+0inputs+0outputs (0major+3057minor)pagefaults 0swaps
+
+new5_ifs.py
+4.97user 0.68system 0:05.74elapsed 98%CPU (0avgtext+0avgdata 17756maxresident)k
+0inputs+0outputs (0major+3018minor)pagefaults 0swaps
+
+old.py
+4.99user 0.73system 0:05.81elapsed 98%CPU (0avgtext+0avgdata 17912maxresident)k
+0inputs+0outputs (0major+2969minor)pagefaults 0swaps

@@ -29,7 +29,7 @@ activate State_A
 State_A ->- Trampoline: return self.parking
 deactivate State_A
 activate Trampoline
-note over Trampoline: next state: parking
+note over Trampoline: next state: driving
 
 Trampoline ->+ State_B: init & yield from
 deactivate Trampoline
@@ -44,7 +44,7 @@ activate State_B
 State_B ->- Trampoline: return self.driving
 deactivate State_B
 activate Trampoline
-note over Trampoline: next state: driving
+note over Trampoline: next state: parking
 
 Trampoline ->+ State_A: init & yield from
 deactivate Trampoline

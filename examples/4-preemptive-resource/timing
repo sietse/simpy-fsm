@@ -1,0 +1,31 @@
+
+----
+
+
+old.py
+21.83user 0.02system 0:21.87elapsed 99%CPU (0avgtext+0avgdata 17856maxresident)k
+0inputs+0outputs (0major+3019minor)pagefaults 0swaps
+
+v1.py
+25.05user 0.02system 0:25.14elapsed 99%CPU (0avgtext+0avgdata 17788maxresident)k
+0inputs+0outputs (0major+3024minor)pagefaults 0swaps
+
+v2.py
+25.10user 0.00system 0:25.13elapsed 99%CPU (0avgtext+0avgdata 17844maxresident)k
+32inputs+16outputs (0major+3051minor)pagefaults 0swaps
+
+v3.py
+25.07user 0.01system 0:25.12elapsed 99%CPU (0avgtext+0avgdata 17812maxresident)k
+32inputs+16outputs (0major+3037minor)pagefaults 0swaps
+
+v4.py
+24.68user 0.01system 0:24.71elapsed 99%CPU (0avgtext+0avgdata 17848maxresident)k
+0inputs+0outputs (0major+3046minor)pagefaults 0swaps
+
+v5.py
+22.82user 0.01system 0:22.86elapsed 99%CPU (0avgtext+0avgdata 17824maxresident)k
+0inputs+0outputs (0major+3029minor)pagefaults 0swaps
+
+----
+
+
